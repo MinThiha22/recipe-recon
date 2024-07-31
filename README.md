@@ -17,17 +17,24 @@ Simply scan the ingredients you have on hand, and our app will suggest mouth-wat
 
 ## Features
 
+- **User Authentication** - Allow users to register, log in and manage their accounts. Users can securely access their profiles and save their favourite recipes.
+- **Ingredients Input** - Users can input ingredients either by taking pictures with mobile's camera or manually entering them. The app will recognise them and use these ingredients for recipes.
+- **Recipe Generation** - Based on the input ingredients, the app will generate a list of possible recipes. Users can view detail instructions for each recipe.
+- **Personalised Recipe Recommendation** - The app provides recipe recommendations every week to the user's previous favourite recipes and dietary preferences.
+- **Shopping List Integration** - App will generate a shopping list based on the ingredients needed for selected recipes. The list can be exported or shared for grocery shopping.
+- **Community** - Users can share their favorite recipes, rate and review other users’ recipes, and participate in a community forum for cooking tips and advice.
+
 ## Installation
 
 ## Usage
 
 ## Team
+### Developers
+- Min Thiha Ko Ko (Mike) - Product Owner
+- Alexander Smokina - Scrum Master
 - Andrew Tier
 - Dan Thrope
 - Droun Mattu
-- Min Thiha Ko Ko 
-- Alexander Smokina
-
 
 ## Contact
 For any questions, suggestions or contributions, please contact minthihakoko@gmail.com.
