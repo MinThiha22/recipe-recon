@@ -1,5 +1,6 @@
 import { ScrollView, Text, View } from 'react-native'
 import { Redirect, router } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../components/CustomButton'
 
@@ -11,8 +12,8 @@ const index = () => {
         <View className="w-full h-full px-4 items-center justify-center">
             
           <View className="relative mt-2">
-            <Text className="text-3xl text-center text-red-800">Recipe Recon</Text>
-            <Text className="text-xl text-black text-center">Your Ingredients, Endless Possibilities</Text>
+            <Text className="text-5xl font-chewy text-center text-title_color">RecipeRecon</Text>
+            <Text className="text-lg font-poppingsRegular text-center text-secondary">Your Ingredients, Endless Possibilities</Text>
           </View>
 
           <CustomButton
@@ -27,6 +28,7 @@ const index = () => {
 
         </View>
       </ScrollView>
+      <StatusBar backgroundColor='#F7E7DC' style='light'></StatusBar>
     </SafeAreaView>
   )
 }
