@@ -11,7 +11,7 @@ import { fontSizes, spacing } from './utils/sizes';
 export const ShoppingList = ({ list, deleteItem }) => {
   if (!list || !list.length)
     return (
-      <Text style={styles.empty}>There are no items in your ShoppingList</Text>
+      <Text style={styles.empty}>There are no items in your Shopping List</Text>
     );
 
   const renderItem = ({ item }) => (

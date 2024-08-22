@@ -30,7 +30,7 @@ export const ShoppingListDisplay = () => {
           style={styles.textInput}
           onChangeText={setSubject}
           value={subject}
-          label="add Item"
+          label="Add Item"
         />
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} size={50} onPress={addItemToList}>
