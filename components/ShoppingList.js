@@ -2,14 +2,14 @@ import React from 'react';
 import { View, StyleSheet, Text, FlatList, Button } from 'react-native';
 import { fontSizes, spacing } from './utils/sizes';
 
-export const ShoppingList = ({ list, removeItem }) => {
+export const ShoppingList = ({ list, deleteItem }) => {
   if (!list || !list.length)
     return <Text style={styles.item}>No Items in ShoppingList</Text>;
 
   const renderItem = ({ item }) => (
     <View style={styles.listItem}>
-      <Text style={styles.item}>- {item}</Text>
-      <Button style={styles.button} title="Delete" onPress={() => removeItem(item)} />
+      <Text style={styles.item}>- {item.name}</Text>
+      <Button style={styles.button} title="Delete" onPress={() => deleteItem(item)} />
     </View>
   );
 

@@ -10,18 +10,19 @@ export const ShoppingListDisplay = () => {
 
   const addItemToList = () => {
     if (subject.trim()) {
-      setList([...list, subject]);
+      const newItem = { id: Date.now(), name: subject };
+      setList([...list, newItem]);
       setSubject('');
       {
         console.log(list);
       }
     }
+  };
 
     const removeItem = (item) => {
       setList(list.filter((x) => x.id !== item.id));
     };
-  };
-
+    
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -35,7 +36,7 @@ export const ShoppingListDisplay = () => {
           <Button title="Add" size={50} onPress={addItemToList} />
         </View>
       </View>
-      <ShoppingList list={list} removeItem={removeItem} />
+      <ShoppingList list={list} deleteItem={removeItem} />
     </View>
   );
 };
