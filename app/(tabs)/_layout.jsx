@@ -10,6 +10,7 @@ const TabLayout = () => {
           name = "home"
           options={{
             title: 'Home',
+            headerShown: false,
           }}
         />
       </Tabs>

@@ -49,7 +49,7 @@ const SignIn = () => {
             className="w-[115px] h-[35px]"
             style={{ width: 115, height: 35}}
           />
-          <Text className="text-2xl text-title_colour text-psemibold font-chewy " style={{marginTop: 40, fontSize: 23}}>
+          <Text className="text-2xl text-title text-psemibold font-chewy " style={{marginTop: 40, fontSize: 23}}>
             Log in to RecipeRecon
           </Text>
 
@@ -77,10 +77,10 @@ const SignIn = () => {
             />
 
             <View className="justify-center pt-5 flex-row gap-2">
-              <Text className="text-white font-pregular" style={{marginTop: 10}}>
+              <Text className="text-secondary font-chewy" style={{marginTop: 10}}>
                 Don't have an acount?
               </Text>
-              <Link href="sign-up" className="text-secondary-200 font-psemibold " style={{marginTop: 10}}> Sign Up!</Link>
+              <Link href="sign-up" className="text-title font-chewy underline " style={{marginTop: 10}}> Sign Up!</Link>
             </View>
         </View>
       </ScrollView>
