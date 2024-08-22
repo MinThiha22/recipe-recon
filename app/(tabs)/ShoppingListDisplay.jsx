@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import { ShoppingList } from '../../ShoppingList';
-import { fontSizes, spacing } from '../../utils/sizes';
+import { ShoppingList } from '../../components/ShoppingList.jsx';
+import { fontSizes, spacing } from '../../utils/sizes.js';
 
 export const ShoppingListDisplay = () => {
   const [subject, setSubject] = useState('');
