@@ -49,7 +49,7 @@ const SignIn = () => {
             className="w-[115px] h-[35px]"
             style={{ width: 115, height: 35}}
           />
-          <Text className="text-2xl text-title_colour text-psemibold font-chewy " style={{marginTop: 40, fontSize: 23}}>
+          <Text className="text-2xl text-title text-psemibold font-chewy " style={{marginTop: 40, fontSize: 23}}>
             Log in to RecipeRecon
           </Text>
 
