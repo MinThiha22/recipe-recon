@@ -6,7 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import { fontSizes, spacing } from './utils/sizes';
+import { fontSizes, spacing } from '../utils/sizes';
 
 export const ShoppingList = ({ list, deleteItem }) => {
   if (!list || !list.length)

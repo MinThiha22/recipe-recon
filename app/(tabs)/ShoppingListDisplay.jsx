@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { TextInput } from 'react-native-paper';
-import { ShoppingList } from './ShoppingList';
-import { fontSizes, spacing } from './utils/sizes';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native';
+import { ShoppingList } from '../../ShoppingList';
+import { fontSizes, spacing } from '../../utils/sizes';
 
 export const ShoppingListDisplay = () => {
   const [subject, setSubject] = useState('');
   const [list, setList] = useState([]);
+  const [isFocused, setIsFocused] = useState(false);
 
   const addItemToList = () => {
     if (subject.trim()) {
@@ -26,14 +32,25 @@ export const ShoppingListDisplay = () => {
         <Text style={styles.title}>Your Shopping List</Text>
       </View>
       <View style={styles.inputContainer}>
+        <Text
+          style={[
+            styles.label,
+            isFocused || subject ? styles.labelFocused : null,
+          ]}>
+          Enter Item
+        </Text>
         <TextInput
-          style={styles.textInput}
+          style={[styles.textInput, isFocused ? styles.textInputFocused : null]}
           onChangeText={setSubject}
           value={subject}
-          label="Add Item"
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} size={50} onPress={addItemToList}>
+          <TouchableOpacity
+            style={styles.button}
+            size={50}
+            onPress={addItemToList}>
             <Text style={styles.buttonText}>Add</Text>
           </TouchableOpacity>
         </View>
@@ -59,6 +76,12 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
     backgroundColor: '#F7E7DC',
     color: '#405D72',
+    height: spacing.xxl,
+    borderColor: '#F7E7DC',
+    borderRadius: 4,
+    paddingLeft: spacing.sm,
+    paddingRight: spacing.sm,
+    fontSize: fontSizes.md,
   },
   inputContainer: {
     padding: spacing.lg,
@@ -77,15 +100,27 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.xxl,
     color: '#FFA726',
   },
-    button: {
+  button: {
     justifyContent: 'space-between',
     backgroundColor: '#F7E7DC',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
   buttonText: {
     color: '#405D72',
     fontSize: fontSizes.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: 20,
+  },
+  label: {
+    position: 'absolute',
+    color: '#405D72',
+    fontSize: fontSizes.md,
+    left: 25,
+    top: 32,
+    zIndex: 1,
+  },
+  labelFocused: {
+    fontSize: fontSizes.sm,
+    color: '#FFA726',
+    top: 12
   },
 });
