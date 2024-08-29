@@ -1,26 +1,30 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { useState } from 'react'
+import { View, Text, TextInput, StyleSheet, Button, FlatList, Image, TouchableOpacity, Linking, CheckBox } from 'react-native'
 import axios from 'axios';
 
 
-export const RecipeList = () => {
+const RecipeList = () => {
   const [query, setQuery] = useState('');
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isSelected, setSelection] = useState(false)
 
   const searchRecipes = async () => {
     if (!query.trim()) {
-      setError('Please enter a query');
+      setError('Please enter ingredients');
       return;
     }
 
     setLoading(true);
     setError('');
+    const ingredientsCount = query.split(' ').filter(Boolean).length;
+
     try {
       const response = await axios.get(`http://localhost:3000/api/recipes`, {
         params: {
           query,
+          maxIngredients: isSelected ? ingredientsCount : undefined,
         },
       });
       setRecipes(response.data.hits || []);
@@ -29,6 +33,10 @@ export const RecipeList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const imagePressed = (url) => {
+    Linking.openURL(url);
   };
 
   return (
@@ -41,6 +49,7 @@ export const RecipeList = () => {
         onChangeText={setQuery}
       />
       <Button title="Search" onPress={searchRecipes} />
+      <CheckBox value={isSelected} onValueChange={setSelection}></CheckBox>
       {loading && <Text>Loading...</Text>}
       {error && <Text style={styles.error}>{error}</Text>}
       <FlatList
@@ -48,6 +57,9 @@ export const RecipeList = () => {
         keyExtractor={(item) => item.recipe.uri}
         renderItem={({ item }) => (
           <View style={styles.recipeContainer}>
+            <TouchableOpacity onPress={() => imagePressed(item.recipe.url)}>
+              <Image style={styles.image} source={{ uri: item.recipe.image }}></Image>
+            </TouchableOpacity>
             <Text style={styles.recipeTitle}>{item.recipe.label}</Text>
             <Text>Ingredients: {item.recipe.ingredientLines.join(', ')}</Text>
           </View>
@@ -58,33 +70,11 @@ export const RecipeList = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  input: {
-    height: 40,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    marginBottom: 16,
-  },
-  error: {
-    color: 'red',
-    marginBottom: 16,
-  },
-  recipeContainer: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  recipeTitle: {
-    fontWeight: 'bold',
+  image:
+  {
+    width: 100,
+    height: 100,
   },
 });
+
+export default RecipeList;
