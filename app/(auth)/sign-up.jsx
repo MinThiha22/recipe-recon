@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { StatusBar } from 'expo-status-bar'
 import { Link, router } from 'expo-router'
 
+import { images } from '../../constants'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
 
@@ -23,7 +24,7 @@ const SignUp = () => {
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
         <View className="w-full justify-center min-h-[80vh] px-4 my-6">
-          
+          <Image source={images.main} resizeMode='contain' className="w-[100px] h-[100px]" />
           <Text className="text-3xl text-title mt-5 font-chewy"> Sign Up to Recipe Recon</Text>
           <FormField 
             title = "Username"
@@ -53,9 +54,9 @@ const SignUp = () => {
             containerStyles="mt-7"
             isLoading={isSumbitting}
           />
-          <View className="justify-center pt-5 flex-row gap-2">
-            <Text className="text-lg text-secondary font-poppinsBlack">Already have an account?</Text>
-            <Link href="/sign-in" className="text-title text-xl font-chewy">Sign In</Link>
+          <View className="justify-center flex-row gap-2">
+            <Text className=" text-secondary font-poppinsBlack pt-5">Already have an account?</Text>
+            <Link href="/sign-in" className="text-title underline text-lg font-chewy pt-4">Sign In</Link>
           </View>
         </View>
       </ScrollView>

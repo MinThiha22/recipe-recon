@@ -12,14 +12,15 @@ const index = () => {
         <View className="w-full h-full px-4 items-center justify-center">
             
           <View className="relative mt-2">
-            <Text className="text-5xl font-chewy text-center text-title_color">RecipeRecon</Text>
-            <Text className="text-lg font-poppingsRegular text-center text-secondary">Your Ingredients, Endless Possibilities</Text>
+            <Text className="text-5xl font-chewy text-center text-title">RecipeRecon</Text>
+            <Text className="text-lg font-poppinsBold text-center text-secondary">Your Ingredients, Endless Possibilities</Text>
+
           </View>
 
           <CustomButton
             title="Get Started"
             handlePress={()=>{
-              router.push('/sign-up')
+              router.push('/sign-in')
             }}
             containerStyles="w-[80%] mt-7"
           >
