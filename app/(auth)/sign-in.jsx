@@ -1,14 +1,14 @@
 import { View, Text, ScrollView, Image, Alert } from 'react-native';
-import React, {useState } from 'react';
+import { React,useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, router } from 'expo-router'
 
-import { images } from '../../constants';
+import {images} from '../../constants';
 
 import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton'
 
-//import { getCurrentUser, signIn } from '../../lib/appwrite';
+
 
 const SignIn = () => {
   const [form, setform] = useState({
@@ -21,35 +21,15 @@ const SignIn = () => {
 
 
   const submit = async () => {
-    if(!form.email === "" || !form.password === "") {
-      Alert.alert('Error', 'Please fill in all the fields')
-    }
-
-    setIsSubmitting(true);
-    
-    try {
-      await signIn(form.email, form.password);
-      const result = await getCurrentUser();
-      setUser(result);
-      setIsLogged(true);
-
-      router.replace('/home')
-    } catch (error) {
-      Alert.alert('Error', error.message)
-    } finally {
-      setIsSubmitting(false)
-    }
+  
   }
 
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
         <View className="w-full justify-center min-h-[85vh] px-4 my-6">
-          <Image 
-            className="w-[115px] h-[35px]"
-            style={{ width: 115, height: 35}}
-          />
-          <Text className="text-2xl text-title text-psemibold font-chewy " style={{marginTop: 40, fontSize: 23}}>
+          <Image source={images.main} resizeMode='contain' className="w-[100px] h-[100px]" />
+          <Text className="text-3xl text-title font-chewy mt-3">
             Log in to RecipeRecon
           </Text>
 
@@ -57,7 +37,7 @@ const SignIn = () => {
             title="Email"
             value={form.email}
             handleChangeText={(e) => setform({ ...form, email: e})}
-            otherStyles="mt-7"
+            otherStyles="mt-3"
             keyboardType="email-address"
           />
 
@@ -65,7 +45,7 @@ const SignIn = () => {
             title="Password"
             value={form.password}
             handleChangeText={(e) => setform({ ...form, password: e})}
-            otherStyles="mt-7"
+            otherStyles="mt-3"
             keyboardType="email-address"
           />
 
@@ -77,10 +57,10 @@ const SignIn = () => {
             />
 
             <View className="justify-center pt-5 flex-row gap-2">
-              <Text className="text-secondary font-chewy" style={{marginTop: 10}}>
+              <Text className="text-lg text-secondary font-poppinsBlack">
                 Don't have an acount?
               </Text>
-              <Link href="sign-up" className="text-title font-chewy underline " style={{marginTop: 10}}> Sign Up!</Link>
+              <Link href="sign-up" className="text-title underline text-lg font-chewy"> Sign Up!</Link>
             </View>
         </View>
       </ScrollView>

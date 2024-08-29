@@ -12,8 +12,8 @@ const index = () => {
         <View className="w-full h-full px-4 items-center justify-center">
             
           <View className="relative mt-2">
-            <Text className="text-5xl font-chewy text-center text-title_color">RecipeRecon</Text>
-            <Text className="text-lg font-poppingsRegular text-center text-secondary">Your Ingredients, Endless Possibilities</Text>
+            <Text className="text-5xl font-chewy text-center text-title">RecipeRecon</Text>
+            <Text className="text-lg font-poppinsBlack text-center text-secondary">Your Ingredients, Endless Possibilities</Text>
           </View>
 
           <CustomButton
