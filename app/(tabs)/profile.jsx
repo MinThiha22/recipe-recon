@@ -5,6 +5,8 @@ import { router } from 'expo-router'
 import CustomButton from '../../components/CustomButton'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { logout } from '../../lib/firebase'
+import { StatusBar } from 'expo-status-bar'
+
 
 const Profile = () => {
   const [isSumbitting, setIsSumbitting] = useState(false);
@@ -27,13 +29,17 @@ const Profile = () => {
   return (
     <SafeAreaView className="h-full bg-primary">
       <View className="w-full min-h-[80vh] items-center justify-center">
+        <Text className="text-3xl mt-5 text-title font-chewy">
+            Profile
+        </Text>
         <CustomButton 
             title = "Log Out"
             handlePress={logOut}
-            containerSyles={"mt-7"}
+            containerStyles={"mt-7 w-[40%]"}
             isLoading={isSumbitting}
           />
       </View>
+      <StatusBar backgroundColor='#161622' style='light'></StatusBar>
     </SafeAreaView>
   )
 }
