@@ -7,6 +7,8 @@ import { Link, router } from 'expo-router'
 import { images } from '../../constants'
 import FormField from '../../components/FormField'
 import CustomButton from '../../components/CustomButton'
+import { useGlobalContext } from '../../context/GlobalProvider'
+import { createUser } from '../../lib/firebase'
 
 const SignUp = () => {
   const [form, setForm] = useState({
@@ -14,17 +16,32 @@ const SignUp = () => {
     email: '',
     password: '',
   })
+  const [isSumbitting, setIsSumbitting] = useState(false);
+  const { setUser, setIsLoggedIn } = useGlobalContext();
+  const submit = async () => {
+    if(!form.username || !form.email || !form.password){
+      Alert.alert('Error','Please fill in all the fields');
+    }
+    setIsSumbitting(true);
+    try {
+      const result = await createUser(form.username,form.email,form.password);
+      setUser(result);
+      setIsLoggedIn(true);
 
-  const submit = () =>{
-
+      //set it to global state
+      router.replace('/home')
+    } catch (error) {
+      Alert.alert('Error',error.message)
+    } finally {
+      setIsSumbitting(false);
+    }
   }
 
-  const [isSumbitting, setIsSumbitting] = useState(false);
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
         <View className="w-full justify-center min-h-[80vh] px-4 my-6">
-          <Image source={images.main} resizeMode='contain' className="w-[100px] h-[100px]" />
+          <Image source={images.whiteLogo} resizeMode='contain' className="w-[120px] h-[120px]" />
           <Text className="text-3xl text-title mt-5 font-chewy"> Sign Up to Recipe Recon</Text>
           <FormField 
             title = "Username"
