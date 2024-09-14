@@ -1,8 +1,7 @@
-import { useState } from 'react'
-import { View, Text, TextInput, StyleSheet, Button, FlatList, Image, TouchableOpacity, Modal } from 'react-native'
+import { useState } from 'react';
+import { View, Text, TextInput, Button, FlatList, Image, TouchableOpacity, Modal, SafeAreaView } from 'react-native';
 import axios from 'axios';
 import RenderHtml from 'react-native-render-html';
-
 
 const RecipeList = () => {
   const [query, setQuery] = useState('');
@@ -11,7 +10,6 @@ const RecipeList = () => {
   const [error, setError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-
 
   const searchRecipes = async () => {
     if (!query.trim()) {
@@ -22,7 +20,7 @@ const RecipeList = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`http://localhost:3000/api/recipeSearch`, {
+      const response = await axios.get(`https://c188-222-152-103-63.ngrok-free.app/api/recipeSearch`, {
         params: {
           query,
         },
@@ -38,7 +36,7 @@ const RecipeList = () => {
 
   const imagePressed = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/recipeInfo`, {
+      const response = await axios.get(`https://c188-222-152-103-63.ngrok-free.app/api/recipeInfo`, {
         params: {
           query: id,
         },
@@ -59,59 +57,56 @@ const RecipeList = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Recipe Search</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter ingredients"
-        value={query}
-        onChangeText={setQuery}
-      />
-      <Button title="Search" onPress={searchRecipes} />
-      {loading && <Text>Loading...</Text>}
-      {error && <Text style={styles.error}>{error}</Text>}
-      <FlatList
-        data={recipes}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.recipeContainer}>
-            <TouchableOpacity onPress={() => imagePressed(item.id)}>
-              <Image style={styles.image} source={{ uri: item.image }}></Image>
-            </TouchableOpacity>
-            <Text style={styles.recipeTitle}>{item.title}</Text>
-            <Text>Ingredients: {item.usedIngredients.map(ingredient => ingredient.name).join(', ')}</Text>
-            <Text>Missing Ingredients: {item.missedIngredients.map(ingredient => ingredient.name).join(', ')}</Text>
-          </View>
-        )}
-      />
-      {selectedRecipe && (<Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}>
-        <Image style={styles.image} source={{ uri: selectedRecipe.image }}></Image>
-        <Text style={styles.modalText}>{selectedRecipe.title}</Text>
-        <RenderHtml
-          contentWidth={400}
-          source={{ html: selectedRecipe.summary }}
+    <SafeAreaView className="bg-primary h-full">
+      <View className="flex-1 p-4">
+        <Text className="text-5xl font-chewy text-center text-title_color">Recipe Search</Text>
+        <TextInput
+          className="border border-gray-300 rounded p-2 mb-4"
+          placeholder="Enter ingredients"
+          value={query}
+          onChangeText={setQuery}
         />
-        <TouchableOpacity
-          style={[styles.button, styles.buttonClose]}
-          onPress={() => setModalVisible(!modalVisible)}>
-          <Text style={styles.textStyle}>Hide Modal</Text>
-        </TouchableOpacity>
-      </Modal>
-      )};
-    </View>
+        <Button title="Search" onPress={searchRecipes} />
+        {loading && <Text>Loading...</Text>}
+        {error && <Text className="text-red-500 mb-4">{error}</Text>}
+        <FlatList
+          data={recipes}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View className="mb-4 bg-primary">
+              <TouchableOpacity className="flex-1 items-center justify-center" onPress={() => imagePressed(item.id)}>
+                <Image className="w-60 h-60" source={{ uri: item.image }} />
+                <Text className="text-2xl font-chewy text-center text-title_color">{item.title}</Text>
+                <Text className="text-md font-poppingsRegular text-center text-secondary">Ingredients: {item.usedIngredients.map(ingredient => ingredient.name).join(', ')}</Text>
+                <Text className="text-md font-poppingsRegular text-center text-secondary"> Missing Ingredients: {item.missedIngredients.map(ingredient => ingredient.name).join(', ')}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+        {selectedRecipe && (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={closeModal}>
+            <View className="flex-1 justify-center items-center m-5 bg-secondary p-5 rounded-lg">
+              <Image className="w-48 h-48" source={{ uri: selectedRecipe.image }} />
+              <Text className="text-3xl font-chewy text-center text-title_color">{selectedRecipe.title}</Text>
+              <RenderHtml
+                contentWidth={400}
+                source={{ html: selectedRecipe.summary }}
+              />
+              <TouchableOpacity
+                className="bg-blue-500 p-3 rounded-full mt-4"
+                onPress={closeModal}>
+                <Text className="text-white font-bold text-center">Hide Modal</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  image:
-  {
-    width: 100,
-    height: 100,
-  },
-});
 
 export default RecipeList;
