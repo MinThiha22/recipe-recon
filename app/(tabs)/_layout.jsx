@@ -10,6 +10,21 @@ const TabLayout = () => {
           name = "home"
           options={{
             title: 'Home',
+            headerShown: false
+          }}
+        />
+        <Tabs.Screen 
+          name = "recipes-list"
+          options={{
+            title: 'recipes-list',
+            headerShown: false
+          }}
+        />
+         <Tabs.Screen 
+          name = "profile"
+          options={{
+            title: 'profile',
+            headerShown: false
           }}
         />
       </Tabs>
