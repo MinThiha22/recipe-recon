@@ -20,7 +20,7 @@ const RecipeList = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`https://c188-222-152-103-63.ngrok-free.app/api/recipeSearch`, {
+      const response = await axios.get(`https://just-teaching-trout.ngrok-free.app/api/recipeSearch`, {
         params: {
           query,
         },
@@ -36,7 +36,7 @@ const RecipeList = () => {
 
   const imagePressed = async (id) => {
     try {
-      const response = await axios.get(`https://c188-222-152-103-63.ngrok-free.app/api/recipeInfo`, {
+      const response = await axios.get(`https://just-teaching-trout.ngrok-free.app/api/recipeInfo`, {
         params: {
           query: id,
         },
