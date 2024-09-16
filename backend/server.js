@@ -7,7 +7,7 @@ dotenv.config();
 
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 80;
 
 
 app.use(cors({origin: '*',}));
@@ -58,6 +58,29 @@ app.get("/api/recipeInfo", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch data from Spoonacular API" });
     }
 });
+
+app.get("/api/imageRecognition", async (req, res) => {
+    const { query} = req.query;
+
+    if (!query) {
+        return res.status(400).json({ error: "Query parameter is required" });
+    }
+
+    try {
+        const response = await axios.get(`https://api.spoonacular.com/food/images/classify`, {
+            params: {
+                imagfilee_url: query,
+                apiKey: process.env.SPOONACULAR_API_KEY
+            },
+        });
+
+        res.status(200).json(response.data);
+    } catch (error) {
+        console.error("Error fetching data from FoodAI API:", error.message);
+        res.status(500).json({ error: "Failed to fetch data from FoodAI API" });
+    }
+});
+
 
 app.use((err, req, res, next) => {
     res.status(500).send("Something went wrong!");
