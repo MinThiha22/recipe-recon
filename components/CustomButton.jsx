@@ -11,6 +11,7 @@ const CustomButton = ( {title, handlePress, containerStyles, textStyles, isLoadi
       disabled={isLoading}
     >
       <Text className={`text-black font-poppinsBold text-lg ${textStyles}`}>{title}</Text>
+
     </TouchableOpacity>
   )
 }

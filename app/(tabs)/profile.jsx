@@ -2,11 +2,18 @@ import { View, Text } from 'react-native'
 import { useState }from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
+<<<<<<< HEAD
 import CustomButton from '../../components/CustomButton'
 import { useGlobalContext } from '../../context/GlobalProvider'
 import { logout } from '../../lib/firebase'
 import { StatusBar } from 'expo-status-bar'
 
+=======
+import { StatusBar } from 'expo-status-bar'
+import CustomButton from '../../components/CustomButton'
+import { useGlobalContext } from '../../context/GlobalProvider'
+import { logout } from '../../lib/firebase'
+>>>>>>> login
 
 const Profile = () => {
   const [isSumbitting, setIsSumbitting] = useState(false);
