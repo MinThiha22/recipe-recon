@@ -4,7 +4,7 @@ const SignIn = () => {
   return (
     <SafeAreaView className="h-full bg-primary">
       <View className="flex-1 items-center justify-center">
-        <Text className="text-3xl text-red">Home!</Text>
+        <Text className="text-3xl text-red">Sign In page!</Text>
       
       </View>
     </SafeAreaView>
