@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/recipeSearch", async (req, res) => {
-    const { query, maxIngredients } = req.query;
+    const { query, amount } = req.query;
 
     if (!query) {
         return res.status(400).json({ error: "Query parameter is required" });
@@ -25,7 +25,7 @@ app.get("/api/recipeSearch", async (req, res) => {
         const response = await axios.get("https://api.spoonacular.com/recipes/findByIngredients", {
             params: {
                 ingredients: query,
-                number: maxIngredients || 10,
+                number: amount || 10,
                 ranking: 2,
                 apiKey: process.env.SPOONACULAR_API_KEY
             },
@@ -69,15 +69,15 @@ app.get("/api/imageRecognition", async (req, res) => {
     try {
         const response = await axios.get(`https://api.spoonacular.com/food/images/classify`, {
             params: {
-                imagfilee_url: query,
+                file: query,
                 apiKey: process.env.SPOONACULAR_API_KEY
             },
         });
 
         res.status(200).json(response.data);
     } catch (error) {
-        console.error("Error fetching data from FoodAI API:", error.message);
-        res.status(500).json({ error: "Failed to fetch data from FoodAI API" });
+        console.error("Error fetching data from Spoonacular API:", error.message);
+        res.status(500).json({ error: "Failed to fetch data from Spoonacular API" });
     }
 });
 
