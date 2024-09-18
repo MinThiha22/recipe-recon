@@ -9,6 +9,7 @@ const FormField = ({ title, value, placeholder, handleChangeText, otherStyles, .
     <View className={`space-y-2 ${otherStyles}`}>
       <Text className="text-base text-secondary font-poppinsBold">{title}</Text>
 
+
       <View className="border-2 border-black-100 w-full h-16 px-4 bg-black-100 rounded-2xl 
       focus:border-secondary-200 items-center flex-row">
         <TextInput 
@@ -26,9 +27,7 @@ const FormField = ({ title, value, placeholder, handleChangeText, otherStyles, .
               className="w-7 h-7" 
               resizeMode='contain'/>
           </TouchableOpacity>
-        )}
-
-       
+        )}      
 
       </View>
     </View>
