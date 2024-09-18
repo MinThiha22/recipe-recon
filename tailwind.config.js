@@ -18,7 +18,7 @@ module.exports = {
         poppinsLight: ["Poppins-Light", "sans-serif"],
         poppinsRegular: ["Poppins-Regular", "sans-serif"],
         poppinsSemiBold: ["Poppins-SemiBold", "sans-serif"],
-        poppingsThin: ["Poppins-Thin", "sans-serif"]
+        poppinsThin: ["Poppins-Thin", "sans-serif"]
       }
     },
   },
