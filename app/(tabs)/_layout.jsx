@@ -1,7 +1,7 @@
 import { View, Text, Image } from 'react-native'
 import React from 'react'
 import { Tabs } from 'expo-router'
-import { icons } from '../../constants'
+import icons from '../../constants/icons'
 
 const TabIcon = ({ icon, color, name, focused }) => {
   return (
@@ -41,14 +41,14 @@ const TabLayout = () => {
           options={{
             title: 'Home',
             headerShown: false,
-            /*tabBarIcon: ({ color, focused }) => (
+            tabBarIcon: ({ color, focused }) => (
               <TabIcon 
                   icon={icons.home}
                   color={color}
                   name="Home"
                   focused={focused}
               />
-          )*/
+          )
           }}
         />
         <Tabs.Screen 
