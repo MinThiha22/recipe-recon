@@ -101,6 +101,13 @@ const RecipeList = () => {
                 onPress={closeModal}>
                 <Text className="text-white font-bold text-center">Hide Modal</Text>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                className="bg-title p-3 rounded-full mt-4"
+              >
+                <Text className="text-white font-bold text-center">Favourite!</Text>
+
+              </TouchableOpacity>
             </View>
           </Modal>
         )}
