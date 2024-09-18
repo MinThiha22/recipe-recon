@@ -63,6 +63,8 @@
           </Text>
           <TextInput
             className={`flex-1 mr-2 bg-secondary text-primary h-12 border rounded pl-2 pr-2 text-md ${isFocused ? 'border-title' : 'border-secondary'}`}
+            placeholder="Enter item"
+            placeholderTextColor="gray"  
             onChangeText={setSubject}
             value={subject}
             onFocus={() => setIsFocused(true)}
