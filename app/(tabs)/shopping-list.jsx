@@ -1,6 +1,6 @@
   import React, { useState, useEffect } from 'react';
   import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-  import { ShoppingList } from '../../components/ShoppingList.jsx';
+  import { List } from '../../components/List.jsx';
   import { db, auth } from '../../lib/firebase.js';
   import { doc, setDoc, getDoc } from 'firebase/firestore';
 
@@ -64,7 +64,7 @@
           <TextInput
             className={`flex-1 mr-2 bg-secondary text-primary h-12 border rounded pl-2 pr-2 text-md ${isFocused ? 'border-title' : 'border-secondary'}`}
             placeholder="Enter item"
-            placeholderTextColor="gray"  
+            placeholderTextColor="gray"   
             onChangeText={setSubject}
             value={subject}
             onFocus={() => setIsFocused(true)}
@@ -79,7 +79,7 @@
           </View>
         </View>
         <View className="flex-1 p-2">
-          <ShoppingList list={list} deleteItem={removeItem} />
+          <List list={list} deleteItem={removeItem} />
         </View>
       </View >
     );
