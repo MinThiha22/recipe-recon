@@ -20,7 +20,7 @@ const RecipeList = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`https://just-teaching-trout.ngrok-free.app/api/recipeSearch`, {
+      const response = await axios.get(`just-teaching-trout.ngrok-free.app/api/recipeIngredientsSearch`, {
         params: {
           query,
         },
@@ -66,7 +66,18 @@ const RecipeList = () => {
           value={query}
           onChangeText={setQuery}
         />
-        <Button title="Search" onPress={searchRecipes} />
+
+        <TouchableOpacity
+                className="bg-blue-500 p-3 rounded-full mt-4"
+                onPress={searchRecipes}>
+                <Text className="text-white font-bold text-center">Search</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="bg-title_color p-3 rounded-full mt-4">
+                <Text className="text-white font-bold text-center">Sort by your ingredients</Text>
+              </TouchableOpacity>
+
         {loading && <Text>Loading...</Text>}
         {error && <Text className="text-red-500 mb-4">{error}</Text>}
         <FlatList
