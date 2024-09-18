@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
-  Button,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
@@ -20,11 +18,30 @@ const Home = () => {
   // State for holding the list of added ingredients
   const [ingredientsList, setIngredientsList] = useState([]);
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
   // Handler function to add the entered ingredient to the list
   const handleAddIngredient = () => {
     if (ingredient.trim()) {
       setIngredientsList([...ingredientsList, ingredient]);
       setIngredient(""); // Clear the input field after adding
+    }
+  };
+
+  const imageRecognition = async (imageUrl) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`https:localhost:80/api/imageRecognition`, {
+        params: {
+          imageUrl,
+        },
+      });
+      setIngredient(response.data);
+    } catch (err) {
+      setError('Failed to fetch recipes');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,7 +64,8 @@ const Home = () => {
       });
 
       if (!pickerResult.canceled) {
-        console.log(pickerResult.assets[0].uri);
+        const imageUrl = pickerResult.assets[0].uri;
+        imageRecognition(imageUrl);
       }
     } catch (error) {
       console.error("Error opening camera:", error);
