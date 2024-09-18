@@ -39,13 +39,13 @@ const TabLayout = () => {
         <Tabs.Screen 
           name = "home"
           options={{
-            title: 'Home',
+            title: 'Input',
             headerShown: false,
             tabBarIcon: ({ color, focused }) => (
               <TabIcon 
-                  icon={icons.home}
+                  icon={icons.plus}
                   color={color}
-                  name="Home"
+                  name="Input"
                   focused={focused}
               />
           )
