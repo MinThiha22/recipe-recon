@@ -4,24 +4,16 @@ import { StatusBar } from 'expo-status-bar'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import CustomButton from '../components/CustomButton'
 import { useGlobalContext } from '../context/GlobalProvider'
-<<<<<<< HEAD
 import images from '../constants/images'
 
 const Index = () => {
   const {isLoading, isLoggedIn } = useGlobalContext();
 
-=======
-
-const index = () => {
-  const {isLoading, isLoggedIn } = useGlobalContext();
-
->>>>>>> login
   if(!isLoading && isLoggedIn) return <Redirect href="/home"/>
   return (
     <SafeAreaView className="bg-primary h-full">
       <ScrollView contentContainerStyle={{ height: '100%'}}>
         <View className="w-full h-full px-4 items-center justify-center">
-<<<<<<< HEAD
           <View className="flex-col items-center mt-2">
             <Image source={images.cooking} resizeMode='contain' className="w-[240px] h-[180px]"></Image>
             <View className="justify-center items-center flex-row gap-1">
@@ -34,12 +26,6 @@ const index = () => {
               <Text className="mt-5 font-poppingsRegular text-center text-secondary">Discover new and exciting meals from the ingredients you already have!</Text>
               <Text className="mt-2 font-poppingsRegular text-center text-secondary"> Simply scan what's in your fridge or pantry, and <Text className="font-bold text-title font-chewy">RecipeRecon</Text> will create delicious recipes just for you!</Text>
             </View>
-=======
-            
-          <View className="relative mt-2">
-            <Text className="text-5xl font-chewy text-center text-title">RecipeRecon</Text>
-            <Text className="text-lg font-poppinsBlack text-center text-secondary">Your Ingredients, Endless Possibilities</Text>
->>>>>>> login
           </View>
 
           <CustomButton
