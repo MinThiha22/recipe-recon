@@ -1,4 +1,4 @@
-import express from "express";
+import express, { query } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import axios from "axios";
@@ -60,16 +60,16 @@ app.get("/api/recipeInfo", async (req, res) => {
 });
 
 app.get("/api/imageRecognition", async (req, res) => {
-    const { imageUrl } = req.query;
+    const { query } = req.query;
 
-    if (!imageUrl) {
+    if (!query) {
         return res.status(400).json({ error: "Query parameter is required" });
     }
 
     try {
         const response = await axios.get(`https://api.spoonacular.com/food/images/classify`, {
             params: {
-                imageUrl: imageUrl,
+                imageUrl: query,
                 apiKey: process.env.SPOONACULAR_API_KEY
             },
         });
