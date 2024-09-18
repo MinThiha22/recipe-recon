@@ -20,7 +20,7 @@ const RecipeList = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`https://just-teaching-trout.ngrok-free.app/api/recipeSearch`, {
+      const response = await axios.get(`http://localhost:80/api/recipeSearch`, {
         params: {
           query,
         },

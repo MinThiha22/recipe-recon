@@ -11,6 +11,7 @@ import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import axios from 'axios';
 
 const Home = () => {
   // State for holding the manually entered ingredient
@@ -20,6 +21,7 @@ const Home = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
 
   // Handler function to add the entered ingredient to the list
   const handleAddIngredient = () => {
@@ -29,16 +31,19 @@ const Home = () => {
     }
   };
 
-  const imageRecognition = async (imageUrl) => {
+  const imageRecognition = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(`https:localhost:80/api/imageRecognition`, {
+      const response = await axios.get(`https://just-teaching-trout.ngrok-free.app/api/imageRecognition`, {
         params: {
-          imageUrl,
+          query,
         },
       });
+      console.log("Recognition response: ", response.data); // Check if the response comes back
       setIngredient(response.data);
+      handleAddIngredient();
     } catch (err) {
+      console.error("Error fetching recognition response: ", err); // Log any error
       setError('Failed to fetch recipes');
     } finally {
       setLoading(false);
@@ -65,7 +70,8 @@ const Home = () => {
 
       if (!pickerResult.canceled) {
         const imageUrl = pickerResult.assets[0].uri;
-        imageRecognition(imageUrl);
+        setQuery(imageUrl);
+        imageRecognition();
       }
     } catch (error) {
       console.error("Error opening camera:", error);
