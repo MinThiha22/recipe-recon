@@ -11,6 +11,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 
 const Home = () => {
   // State for holding the manually entered ingredient
@@ -23,6 +25,36 @@ const Home = () => {
     if (ingredient.trim()) {
       setIngredientsList([...ingredientsList, ingredient]);
       setIngredient(""); // Clear the input field after adding
+    }
+  };
+
+  // Camera Funstion
+  const openCamera = async () => {
+    try {
+      let result = await ImagePicker.requestCameraPermissionsAsync();
+      if (result.status !== "granted") {
+        Alert.alert(
+          "Permission denied",
+          "Sorry, we need camera permissions to take a picture!"
+        );
+        return;
+      }
+
+      let pickerResult = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+
+      if (!pickerResult.canceled) {
+        console.log(pickerResult.assets[0].uri);
+      }
+    } catch (error) {
+      console.error("Error opening camera:", error);
+      Alert.alert(
+        "Error",
+        "Something went wrong while trying to open the camera. Please try again."
+      );
     }
   };
 
@@ -50,10 +82,25 @@ const Home = () => {
         <View className="flex-1 items-center justify-center p-5">
           <Text className="text-4xl mt-2 font-chewy text-title">Home</Text>
 
-          {/* TextInput functionality */}
-          <View className="w-[100%] items-center mt-1 mb-2">
+          {/* CameraInput functionality */}
+          <View className="items-center mt-4">
             <Text className="text-lg font-poppinsBold text-secondary">
-              Enter Ingredients
+              Snap Your Ingedients
+            </Text>
+          </View>
+          <View>
+            <TouchableOpacity
+              onPress={openCamera}
+              className="mb-2 mt-2 p-2 bg-secondary rounded-full"
+            >
+              <Ionicons name="camera" size={40} color="black" />
+            </TouchableOpacity>
+          </View>
+
+          {/* TextInput functionality */}
+          <View className="w-[100%] items-center mt-2 mb-2">
+            <Text className="text-lg font-poppinsBold text-secondary">
+              or Enter Manually
             </Text>
             <FormField
               placeholder="Type ingredient here..."
