@@ -21,6 +21,7 @@ const TabIcon = ({ icon, color, name, focused }) => {
   )
 }
 
+//navbar
 const TabLayout = () => {
   return (
     <>
