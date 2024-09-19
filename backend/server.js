@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import axios from "axios";
-
-dotenv.config();
-
-
-=======
 import express, { query } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -17,7 +7,6 @@ import FormData from "form-data";
 
 dotenv.config();
 
->>>>>>> main
 const app = express();
 const PORT = process.env.PORT || 80;
 
