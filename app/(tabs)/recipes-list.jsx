@@ -16,11 +16,10 @@ const RecipeList = () => {
       setError('Please enter ingredients');
       return;
     }
-
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`http://localhost:80/api/recipeSearch`, {
+      const response = await axios.get(`https://just-teaching-trout.ngrok-free.app/api/recipeSearch`, {
         params: {
           query,
         },
@@ -42,6 +41,7 @@ const RecipeList = () => {
         },
       });
       const recipeInfo = response.data;
+      console.log(recipeInfo);
       setSelectedRecipe(recipeInfo);
       setModalVisible(true);
     } catch (err) {
