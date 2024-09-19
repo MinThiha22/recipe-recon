@@ -11,14 +11,17 @@
     const [user, setUser] = useState(null);
 
     useEffect(() => {
+      //get current user information
       const currentUser = auth.currentUser;
       setUser(currentUser);
       
       if (currentUser) {
+        //load shopping list
         fetchShoppingList(currentUser.uid);
       }
     }, []);
 
+    //get current user shopping list  from database
     const fetchShoppingList = async (userId) => {
       const docRef = doc(db, 'shopping-list', userId);
       const docSnap = await getDoc(docRef);
@@ -28,6 +31,7 @@
       }
     };
 
+    //save current user shopping list to db
     const saveShoppingList = async (updatedList) => {
       if (user) {
         const userShoppingListRef = doc(db, 'shopping-list', user.uid);
@@ -35,6 +39,7 @@
       }
     };
 
+    //add item to shoppingList
     const addItemToList = () => {
       if (subject.trim()) {
         const newItem = { id: Date.now(), name: subject };
@@ -45,6 +50,7 @@
       }
     };
 
+    //remove item from shopping list
     const removeItem = (item) => {
       const updatedList = list.filter((x) => x.id !== item.id);
       setList(updatedList);
