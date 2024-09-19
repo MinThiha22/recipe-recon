@@ -1,4 +1,4 @@
-import main from "../assets/images/logo.png";
 import whiteLogo from "../assets/images/logo_white.png";
+import cooking from "../assets/images/cooking.gif"
 
-export default {main, whiteLogo};
+export default {whiteLogo, cooking};
