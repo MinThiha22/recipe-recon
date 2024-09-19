@@ -23,12 +23,12 @@ const RecipeList = () => {
     setLoading(true);
     setError('');
 
+    //refresh ingredients
     if (user && currentIsIngredients) {
-      await fetchIngredients(user.uid);  // Fetch ingredients before making the API request
+      await fetchIngredients(user.uid); 
     }
 
     const ingredients = ingredientsList.join(',');
-    console.log(ingredients);
     let endpoint = null;
     let param = {};
     if (query.trim()) {
