@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { Alert, View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,16 +18,6 @@ import {
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
 import { images, icons } from "../../constants";
-=======
-import { View, Text } from 'react-native'
-import { useState }from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { router } from 'expo-router'
-import { StatusBar } from 'expo-status-bar'
-import CustomButton from '../../components/CustomButton'
-import { useGlobalContext } from '../../context/GlobalProvider'
-import { logout } from '../../lib/firebase'
->>>>>>> main
 
 const Profile = () => {
   const [isSumbitting, setIsSumbitting] = useState(false);
