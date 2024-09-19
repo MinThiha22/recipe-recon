@@ -73,6 +73,7 @@ const RecipeList = () => {
         params: { query: id },
       });
       const recipeInfo = response.data;
+      console.log(recipeInfo);
       setSelectedRecipe(recipeInfo);
       setModalVisible(true);
     } catch (err) {

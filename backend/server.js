@@ -1,10 +1,11 @@
-import express from "express";
+import express, { query } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import axios from "axios";
+import multer from "multer";
+import FormData from "form-data";
 
 dotenv.config();
-
 
 const app = express();
 const PORT = process.env.PORT || 80;
@@ -101,6 +102,54 @@ app.get("/api/recipeSearch/random", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch data from Spoonacular API" });
     }
 });
+
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post("/api/imageRecognition", upload.single('file'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    try {
+        console.log("Received file:", req.file.originalname);
+
+        // Create a new FormData instance
+        const formData = new FormData();
+        
+        // Append the file buffer directly to formData
+        formData.append('file', req.file.buffer, {
+            filename: req.file.originalname,
+            contentType: req.file.mimetype,
+        });
+
+        // Send the file to Spoonacular API
+        const response = await axios.post(
+            'https://api.spoonacular.com/food/images/classify',
+            formData,
+            {
+                params: {
+                    apiKey: process.env.SPOONACULAR_API_KEY
+                },
+                headers: {
+                    ...formData.getHeaders()
+                },
+                maxContentLength: Infinity,
+                maxBodyLength: Infinity
+            }
+        );
+
+        console.log("Spoonacular API response:", response.data);
+        res.status(200).json(response.data);
+    } catch (error) {
+        console.error("Error fetching data from Spoonacular API:", error.message);
+        if (error.response) {
+            console.error("Spoonacular API error response:", error.response.data);
+        }
+        res.status(500).json({ error: "Failed to fetch data from Spoonacular API" });
+    }
+});
+
 
 app.use((err, req, res, next) => {
     res.status(500).send("Something went wrong!");
