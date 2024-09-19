@@ -18,7 +18,7 @@ const RecipeList = () => {
   const [ingredients, setIngredients] = useState(null);
 
   //get api recipes data from server
-  const searchRecipes = async () => {
+  const searchRecipes = async (currentIsIngredients) => {
     setRecipes();
     setLoading(true);
     setError('');
@@ -33,12 +33,12 @@ const RecipeList = () => {
       param = { query, ingredients };
     } else {
       //if search bar is empty and sorting by ingredients use ingredients search endpoint, if ot sorting by ingredients use random endpoint
-      endpoint = isIngredients
+      endpoint = currentIsIngredients
         ? 'https://roughy-polite-wholly.ngrok-free.app/api/ingredientsSearch'
         : 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/random';
 
       //if sorting by ingredients use ingredients parameter else use no paramters 
-      param = isIngredients
+      param = currentIsIngredients
         ? { ingredients }
         : {};
     }
@@ -142,7 +142,7 @@ const RecipeList = () => {
  const toggleIngredientsSort = () => {
     setIsIngredients(prevIsIngredients => {
       const newIsIngredients = !prevIsIngredients;
-      searchRecipes(); 
+      searchRecipes(newIsIngredients); 
       return newIsIngredients;
     });
   };
