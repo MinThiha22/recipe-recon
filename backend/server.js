@@ -16,17 +16,41 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/recipeSearch", async (req, res) => {
-    const { query, amount } = req.query;
+    const { query, ingredients } = req.query;
 
     if (!query) {
         return res.status(400).json({ error: "Query parameter is required" });
+    }
+    try {
+        const response = await axios.get("https://api.spoonacular.com/recipes/complexSearch", {
+            params: {
+                query: query,
+                number: 10,
+                includeIngredients: ingredients,
+                fillIngredients: true,
+                sort: 'min-missing-ingredients',
+                apiKey: process.env.SPOONACULAR_API_KEY
+            },
+        });
+
+        res.status(200).json(response.data);
+    } catch (error) {
+        console.error("Error fetching data from Spoonacular API:", error.message);
+        res.status(500).json({ error: "Failed to fetch data from Spoonacular API" });
+    }
+});
+
+app.get("/api/ingredientsSearch", async (req, res) => {
+    const { ingredients } = req.query;
+    if (!ingredients) {
+        return res.status(400).json({ error: "Ingredients parameter is required" });
     }
 
     try {
         const response = await axios.get("https://api.spoonacular.com/recipes/findByIngredients", {
             params: {
-                ingredients: query,
-                number: amount || 10,
+                ingredients: ingredients,
+                number: 10,
                 ranking: 2,
                 apiKey: process.env.SPOONACULAR_API_KEY
             },
@@ -40,7 +64,7 @@ app.get("/api/recipeSearch", async (req, res) => {
 });
 
 app.get("/api/recipeInfo", async (req, res) => {
-    const { query} = req.query;
+    const { query } = req.query;
 
     if (!query) {
         return res.status(400).json({ error: "Query parameter is required" });
@@ -49,6 +73,25 @@ app.get("/api/recipeInfo", async (req, res) => {
     try {
         const response = await axios.get(`https://api.spoonacular.com/recipes/${query}/information`, {
             params: {
+                id: query,
+                apiKey: process.env.SPOONACULAR_API_KEY
+            },
+        });
+
+        res.status(200).json(response.data);
+    } catch (error) {
+        console.error("Error fetching data from Spoonacular API:", error.message);
+        res.status(500).json({ error: "Failed to fetch data from Spoonacular API" });
+    }
+});
+
+app.get("/api/recipeSearch/random", async (req, res) => {
+    const { query } = req.query;
+
+    try {
+        const response = await axios.get("https://api.spoonacular.com/recipes/random", {
+            params: {
+                number: 10,
                 apiKey: process.env.SPOONACULAR_API_KEY
             },
         });
