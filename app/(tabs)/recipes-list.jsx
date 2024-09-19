@@ -15,7 +15,9 @@ const RecipeList = () => {
   const [list, setList] = useState([]);
   const [user, setUser] = useState(null);
   const [isIngredients, setIsIngredients] = useState(false);
+  const [ingredients, setIngredients] = useState(null);
 
+  //get api recipes data from server
   const searchRecipes = async () => {
     setLoading(true);
     setError('');
@@ -24,20 +26,32 @@ const RecipeList = () => {
       let endpoint;
       const params = {};
 
-      if (!query.trim()) {
+      if (query.trim()) {
+        //if search bar is not empty and sorting by ingredients use ingredients endpoint, if not sorting by ingredients use default endpoint
         endpoint = isIngredients
-          ? 'https://just-teaching-trout.ngrok-free.app/api/recipeSearch/ingredients' 
+          ? 'https://just-teaching-trout.ngrok-free.app/api/recipeSearch/ingredients'
           : 'https://just-teaching-trout.ngrok-free.app/api/recipeSearch/default';
+
+        //if sorting by ingredients use parameters query and ingredients else use query
+        params = isIngredients
+          ? { query, ingredients }
+          : { query };
       } else {
-        endpoint = isIngredients 
-          ? 'https://just-teaching-trout.ngrok-free.app/api/ingredientsSearch' 
+        //if search bar is empty and sorting by ingredients use ingredients search endpoint, if ot sorting by ingredients use random endpoint
+        endpoint = isIngredients
+          ? 'https://just-teaching-trout.ngrok-free.app/api/ingredientsSearch'
           : 'https://just-teaching-trout.ngrok-free.app/api/recipeSearch/random';
-          
-        params.query = query;
+
+        //if sorting by ingredients use ingredients parameter else use no paramters 
+        params = isIngredients
+          ? { ingredients }
+          : {};
       }
 
+      //get data from server endpoint using parameters
       const response = await axios.get(endpoint, { params });
       const recipeData = response.data;
+      //set recipe results to the data from server
       setRecipes(recipeData || []);
     } catch (err) {
       setError('Failed to fetch recipes');
@@ -46,6 +60,7 @@ const RecipeList = () => {
     }
   };
 
+  //get specific recipe information from server when recipe is pressed
   const imagePressed = async (id) => {
     try {
       const response = await axios.get(`https://just-teaching-trout.ngrok-free.app/api/recipeInfo`, {
@@ -61,20 +76,23 @@ const RecipeList = () => {
     }
   };
 
+  //close pop up
   const closeModal = () => {
     setModalVisible(false);
     setSelectedRecipe(null);
   };
 
+  //get current user information and favourites on mount
   useEffect(() => {
     const currentUser = auth.currentUser;
     setUser(currentUser);
-    
+
     if (currentUser) {
       fetchFavourites(currentUser.uid);
     }
   }, []);
 
+  //get favourites from firebase
   const fetchFavourites = async (userId) => {
     const docRef = doc(db, 'favourites', userId);
     const docSnap = await getDoc(docRef);
@@ -84,6 +102,7 @@ const RecipeList = () => {
     }
   };
 
+  //save favourites to firebase
   const saveFavourites = async (updatedList) => {
     if (user) {
       const userFavouritesRef = doc(db, 'favourites', user.uid);
@@ -91,6 +110,7 @@ const RecipeList = () => {
     }
   };
 
+  //add favourite to item list and firebase
   const addFavourite = () => {
     const newItem = { id: selectedRecipe.id, name: selectedRecipe };
     const updatedList = [...list, newItem];
@@ -98,16 +118,19 @@ const RecipeList = () => {
     saveFavourites(updatedList);
   };
 
+  //remove favourite from item list and firebase
   const removeFavourite = () => {
     const updatedList = list.filter((x) => x.id !== selectedRecipe.id);
     setList(updatedList);
     saveFavourites(updatedList);
   };
 
+  //check if item is favourited
   const isFavourite = (recipeId) => {
     return list.some((item) => item.id === recipeId);
   };
 
+  //toggle favourite based on if it is favourited
   const toggleFavourite = () => {
     if (isFavourite(selectedRecipe.id)) {
       removeFavourite();
@@ -143,7 +166,7 @@ const RecipeList = () => {
 
         {loading && <Text>Loading...</Text>}
         {error && <Text className="text-red-500 mb-4">{error}</Text>}
-        
+
         <FlatList
           className="pt-4"
           data={recipes}
@@ -167,7 +190,7 @@ const RecipeList = () => {
             </View>
           )}
         />
-        
+
         {selectedRecipe && (
           <Modal
             animationType="slide"
