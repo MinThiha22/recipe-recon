@@ -19,40 +19,35 @@ const RecipeList = () => {
 
   //get api recipes data from server
   const searchRecipes = async () => {
+    setRecipes();
     setLoading(true);
     setError('');
 
+    let endpoint = null;
+    let param = {};
+    if (query.trim()) {
+      //if search bar is not empty and sorting by ingredients use ingredients endpoint, if not sorting by ingredients use default endpoint
+      endpoint = 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch';
+
+      //if sorting by ingredients use parameters query and ingredients else use query
+      param = { query, ingredients };
+    } else {
+      //if search bar is empty and sorting by ingredients use ingredients search endpoint, if ot sorting by ingredients use random endpoint
+      endpoint = isIngredients
+        ? 'https://roughy-polite-wholly.ngrok-free.app/api/ingredientsSearch'
+        : 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/random';
+
+      //if sorting by ingredients use ingredients parameter else use no paramters 
+      param = isIngredients
+        ? { ingredients }
+        : {};
+    }
+
+    //get data from server endpoint using parameters
     try {
-      let endpoint;
-      const params = {};
-
-      if (query.trim()) {
-        //if search bar is not empty and sorting by ingredients use ingredients endpoint, if not sorting by ingredients use default endpoint
-        endpoint = isIngredients
-          ? 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/ingredients'
-          : 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/default';
-
-        //if sorting by ingredients use parameters query and ingredients else use query
-        params = isIngredients
-          ? { query, ingredients }
-          : { query };
-      } else {
-        //if search bar is empty and sorting by ingredients use ingredients search endpoint, if ot sorting by ingredients use random endpoint
-        endpoint = isIngredients
-          ? 'https://roughy-polite-wholly.ngrok-free.app/api/ingredientsSearch'
-          : 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/random';
-
-        //if sorting by ingredients use ingredients parameter else use no paramters 
-        params = isIngredients
-          ? { ingredients }
-          : {};
-      }
-
-      //get data from server endpoint using parameters
-      const response = await axios.get(endpoint, { params });
-      const recipeData = response.data;
-      //set recipe results to the data from server
-      setRecipes(recipeData || []);
+      const response = await axios.get(endpoint, { params: param });
+      const recipeData = response.data.recipes ||  response.data.results || response.data;
+      setRecipes(recipeData);
     } catch (err) {
       setError('Failed to fetch recipes');
     } finally {
@@ -60,10 +55,14 @@ const RecipeList = () => {
     }
   };
 
+  useEffect(() => {
+    searchRecipes();
+  }, [isIngredients]);
+
   //get specific recipe information from server when recipe is pressed
   const imagePressed = async (id) => {
     try {
-      const response = await axios.get(`https://just-teaching-trout.ngrok-free.app/api/recipeInfo`, {
+      const response = await axios.get(`https://roughy-polite-wholly.ngrok-free.app/api/recipeInfo`, {
         params: { query: id },
       });
       const recipeInfo = response.data;
@@ -139,6 +138,15 @@ const RecipeList = () => {
     }
   };
 
+  //toggle ingredient sort and update the search
+ const toggleIngredientsSort = () => {
+    setIsIngredients(prevIsIngredients => {
+      const newIsIngredients = !prevIsIngredients;
+      searchRecipes(); 
+      return newIsIngredients;
+    });
+  };
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <View className="flex-1 p-4">
@@ -153,21 +161,20 @@ const RecipeList = () => {
         <TouchableOpacity
           className="bg-blue-500 p-3 rounded-full mt-4"
           onPress={searchRecipes}
+          disabled={loading} 
         >
           <Text className="text-white font-bold text-center">Search</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           className="bg-title p-3 rounded-full mt-4"
-          onPress={() => {
-            setIsIngredients(true)
-            setQuery('');
-          }}
+          onPress={toggleIngredientsSort}
+          disabled={loading} 
         >
-          <Text className="text-white font-bold text-center">Sort by your ingredients</Text>
+          <Text className="text-white font-bold text-center">{isIngredients ? 'Unsort by your ingredients' : 'Sort by your ingredients'}</Text>
         </TouchableOpacity>
 
-        {loading && <Text>Loading...</Text>}
+        {loading && <Text className="text-3xl pt-10 font-chewy text-center text-title">Loading...</Text>}
         {error && <Text className="text-red-500 mb-4">{error}</Text>}
 
         <FlatList
@@ -182,10 +189,10 @@ const RecipeList = () => {
                 {isIngredients && (
                   <>
                     <Text className="text-md font-poppingsRegular text-center text-secondary">
-                      Ingredients: {item.usedIngredients.map(ingredient => ingredient.name).join(', ')}
+                      Ingredients: {item.usedIngredients && item.usedIngredients.length > 0 ? item.usedIngredients.map(ingredient => ingredient.name).join(', '): ""}
                     </Text>
                     <Text className="text-md font-poppingsRegular text-center text-secondary">
-                      Missing Ingredients: {item.missedIngredients.map(ingredient => ingredient.name).join(', ')}
+                      Missing Ingredients: {item.missedIngredients && item.missedIngredients.length > 0 ? item.missedIngredients.map(ingredient => ingredient.name).join(', '): ""}
                     </Text>
                   </>
                 )}
