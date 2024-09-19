@@ -56,7 +56,7 @@ const RecipeList = () => {
   };
 
   useEffect(() => {
-    searchRecipes();
+    searchRecipes(isIngredients);
   }, [isIngredients]);
 
   //get specific recipe information from server when recipe is pressed
@@ -160,7 +160,7 @@ const RecipeList = () => {
 
         <TouchableOpacity
           className="bg-blue-500 p-3 rounded-full mt-4"
-          onPress={searchRecipes}
+          onPress={searchRecipes(isIngredients)}
           disabled={loading} 
         >
           <Text className="text-white font-bold text-center">Search</Text>
