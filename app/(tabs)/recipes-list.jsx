@@ -29,8 +29,8 @@ const RecipeList = () => {
       if (query.trim()) {
         //if search bar is not empty and sorting by ingredients use ingredients endpoint, if not sorting by ingredients use default endpoint
         endpoint = isIngredients
-          ? 'https://just-teaching-trout.ngrok-free.app/api/recipeSearch/ingredients'
-          : 'https://just-teaching-trout.ngrok-free.app/api/recipeSearch/default';
+          ? 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/ingredients'
+          : 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/default';
 
         //if sorting by ingredients use parameters query and ingredients else use query
         params = isIngredients
@@ -39,8 +39,8 @@ const RecipeList = () => {
       } else {
         //if search bar is empty and sorting by ingredients use ingredients search endpoint, if ot sorting by ingredients use random endpoint
         endpoint = isIngredients
-          ? 'https://just-teaching-trout.ngrok-free.app/api/ingredientsSearch'
-          : 'https://just-teaching-trout.ngrok-free.app/api/recipeSearch/random';
+          ? 'https://roughy-polite-wholly.ngrok-free.app/api/ingredientsSearch'
+          : 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/random';
 
         //if sorting by ingredients use ingredients parameter else use no paramters 
         params = isIngredients
@@ -159,7 +159,10 @@ const RecipeList = () => {
 
         <TouchableOpacity
           className="bg-title p-3 rounded-full mt-4"
-          onPress={() => setIsIngredients(true)}
+          onPress={() => {
+            setIsIngredients(true)
+            setQuery('');
+          }}
         >
           <Text className="text-white font-bold text-center">Sort by your ingredients</Text>
         </TouchableOpacity>

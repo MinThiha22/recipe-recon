@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/recipeSearch/default", async (req, res) => {
-    const { query, amount} = req.query;
+    const { query } = req.query;
 
     if (!query) {
         return res.status(400).json({ error: "Query parameter is required" });
@@ -24,7 +24,7 @@ app.get("/api/recipeSearch/default", async (req, res) => {
         const response = await axios.get("https://api.spoonacular.com/recipes/complexSearch", {
             params: {
                 query: query,
-                number: amount || 10,
+                number: 10,
                 apiKey: process.env.SPOONACULAR_API_KEY
             },
         });
@@ -36,7 +36,7 @@ app.get("/api/recipeSearch/default", async (req, res) => {
 });
 
 app.get("/api/recipeSearch/ingredients", async (req, res) => {
-    const { query, ingredients, amount } = req.query;
+    const { query, ingredients } = req.query;
 
     if (!query) {
         return res.status(400).json({ error: "Query parameter is required" });
@@ -45,9 +45,9 @@ app.get("/api/recipeSearch/ingredients", async (req, res) => {
         const response = await axios.get("https://api.spoonacular.com/recipes/complexSearch", {
             params: {
                 query: query,
-                number: amount || 10,
+                number: 10,
                 includeIngredients: ingredients,
-                sort: min-missing-ingredients,
+                sort: 'min-missing-ingredients',
                 apiKey: process.env.SPOONACULAR_API_KEY
             },
         });
@@ -60,7 +60,7 @@ app.get("/api/recipeSearch/ingredients", async (req, res) => {
 });
 
 app.get("/api/ingredientsSearch", async (req, res) => {
-    const { query, amount } = req.query;
+    const { query } = req.query;
     if (!query) {
         return res.status(400).json({ error: "Query parameter is required" });
     }
@@ -69,7 +69,7 @@ app.get("/api/ingredientsSearch", async (req, res) => {
         const response = await axios.get("https://api.spoonacular.com/recipes/findByIngredients", {
             params: {
                 ingredients: query,
-                number: amount || 10,
+                number: 10,
                 ranking: 2,
                 apiKey: process.env.SPOONACULAR_API_KEY
             },
@@ -82,7 +82,7 @@ app.get("/api/ingredientsSearch", async (req, res) => {
     }
 });
 
-app.get("/api/recipeInfo/default", async (req, res) => {
+app.get("/api/recipeInfo", async (req, res) => {
     const { query } = req.query;
 
     if (!query) {
@@ -92,6 +92,7 @@ app.get("/api/recipeInfo/default", async (req, res) => {
     try {
         const response = await axios.get(`https://api.spoonacular.com/recipes/${query}/information`, {
             params: {
+                id: query,
                 apiKey: process.env.SPOONACULAR_API_KEY
             },
         });
