@@ -18,6 +18,8 @@ const SignUp = () => {
   })
   const [isSumbitting, setIsSumbitting] = useState(false);
   const { setUser, setIsLoggedIn } = useGlobalContext();
+
+  // submit user information when sign up button is pressed
   const submit = async () => {
     if(!form.username || !form.email || !form.password){
       Alert.alert('Error','Please fill in all the fields');
@@ -28,7 +30,7 @@ const SignUp = () => {
       setUser(result);
       setIsLoggedIn(true);
 
-      //set it to global state
+      // reroute to home after sign up
       router.replace('/home')
     } catch (error) {
       Alert.alert('Error',error.message)

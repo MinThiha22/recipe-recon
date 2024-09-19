@@ -13,12 +13,12 @@ module.exports = {
         poppinsBlack: ["Poppins-Black","sans-serif"],
         poppinsBold: ["Poppins-Bold", "sans-serif"],
         poppinsExtraBold: ["Poppins-ExtraBold", "sans-serif"],
-        poppingsExtraLight: ["Poppins-ExtraLight", "sans-serif"],
-        poppingsItalic: ["Poppins-Italic", "sans-serif"],
-        poppingsLight: ["Poppins-Light", "sans-serif"],
-        poppingsRegular: ["Poppins-Regular", "sans-serif"],
-        poppingsSemiBold: ["Poppins-SemiBold", "sans-serif"],
-        poppingsThin: ["Poppins-Thin", "sans-serif"]
+        poppinsExtraLight: ["Poppins-ExtraLight", "sans-serif"],
+        poppinsItalic: ["Poppins-Italic", "sans-serif"],
+        poppinsLight: ["Poppins-Light", "sans-serif"],
+        poppinsRegular: ["Poppins-Regular", "sans-serif"],
+        poppinsSemiBold: ["Poppins-SemiBold", "sans-serif"],
+        poppinsThin: ["Poppins-Thin", "sans-serif"]
       }
     },
   },
