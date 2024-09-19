@@ -3,14 +3,13 @@ import { React,useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, router } from 'expo-router'
 import { StatusBar } from 'expo-status-bar';
-
 import {images} from '../../constants';
-
 import FormField from '../../components/FormField';
 import CustomButton from '../../components/CustomButton'
 import { useGlobalContext } from '../../context/GlobalProvider';
 import { signIn } from '../../lib/firebase'
 
+// sign in to the app when sign-in button is pressed
 const SignIn = () => {
   const [form, setForm] = useState({
     email: '',
@@ -30,7 +29,7 @@ const SignIn = () => {
       const user = await signIn(form.email,form.password)
       setUser(user);
       setIsLoggedIn(true);
-      //set it to global state
+      // reroute to home after sign-in
       router.replace('/home')
     } catch (error) {
       Alert.alert('Error',error.message)
