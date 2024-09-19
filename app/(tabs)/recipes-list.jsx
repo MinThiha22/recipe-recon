@@ -12,16 +12,17 @@ const RecipeList = () => {
   const [error, setError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [list, setList] = useState([]);
+  const [favouriteList, setFavouriteList] = useState([]);
   const [user, setUser] = useState(null);
   const [isIngredients, setIsIngredients] = useState(false);
-  const [ingredients, setIngredients] = useState(null);
+  const [ingredientsList, setIngredientsList] = useState([]);
 
   //get api recipes data from server
   const searchRecipes = async (currentIsIngredients) => {
     setRecipes();
     setLoading(true);
     setError('');
+    const ingredients = ingredientsList.join(',');
 
     let endpoint = null;
     let param = {};
@@ -88,6 +89,7 @@ const RecipeList = () => {
 
     if (currentUser) {
       fetchFavourites(currentUser.uid);
+      fetchIngredients(currentUser.uid);
     }
   }, []);
 
@@ -97,7 +99,17 @@ const RecipeList = () => {
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
-      setList(docSnap.data().list);
+      setFavouriteList(docSnap.data().list);
+    }
+  };
+
+  //get ingredients from firebase
+  const fetchIngredients = async (userId) => {
+    const docRef = doc(db, 'ingredients', userId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      setIngredientsList(docSnap.data().list);
     }
   };
 
@@ -112,21 +124,21 @@ const RecipeList = () => {
   //add favourite to item list and firebase
   const addFavourite = () => {
     const newItem = { id: selectedRecipe.id, name: selectedRecipe };
-    const updatedList = [...list, newItem];
-    setList(updatedList);
+    const updatedList = [...favouriteList, newItem];
+    setFavouriteList(updatedList);
     saveFavourites(updatedList);
   };
 
   //remove favourite from item list and firebase
   const removeFavourite = () => {
-    const updatedList = list.filter((x) => x.id !== selectedRecipe.id);
-    setList(updatedList);
+    const updatedList = favouriteList.filter((x) => x.id !== selectedRecipe.id);
+    setFavouriteList(updatedList);
     saveFavourites(updatedList);
   };
 
   //check if item is favourited
   const isFavourite = (recipeId) => {
-    return list.some((item) => item.id === recipeId);
+    return favouriteList.some((item) => item.id === recipeId);
   };
 
   //toggle favourite based on if it is favourited
