@@ -22,8 +22,13 @@ const RecipeList = () => {
     setRecipes();
     setLoading(true);
     setError('');
-    const ingredients = ingredientsList.join(',');
 
+    if (user && currentIsIngredients) {
+      await fetchIngredients(user.uid);  // Fetch ingredients before making the API request
+    }
+
+    const ingredients = ingredientsList.join(',');
+    console.log(ingredients);
     let endpoint = null;
     let param = {};
     if (query.trim()) {
@@ -47,7 +52,7 @@ const RecipeList = () => {
     //get data from server endpoint using parameters
     try {
       const response = await axios.get(endpoint, { params: param });
-      const recipeData = response.data.recipes ||  response.data.results || response.data;
+      const recipeData = response.data.recipes || response.data.results || response.data;
       setRecipes(recipeData);
     } catch (err) {
       setError('Failed to fetch recipes');
@@ -56,6 +61,7 @@ const RecipeList = () => {
     }
   };
 
+  //call search recipes on start
   useEffect(() => {
     searchRecipes(isIngredients);
   }, [isIngredients]);
@@ -111,6 +117,9 @@ const RecipeList = () => {
     if (docSnap.exists()) {
       setIngredientsList(docSnap.data().list);
     }
+    else {
+      setIngredientsList([]);
+    }
   };
 
   //save favourites to firebase
@@ -151,10 +160,10 @@ const RecipeList = () => {
   };
 
   //toggle ingredient sort and update the search
- const toggleIngredientsSort = () => {
+  const toggleIngredientsSort = () => {
     setIsIngredients(prevIsIngredients => {
       const newIsIngredients = !prevIsIngredients;
-      searchRecipes(newIsIngredients); 
+      searchRecipes(newIsIngredients);
       return newIsIngredients;
     });
   };
@@ -172,8 +181,8 @@ const RecipeList = () => {
 
         <TouchableOpacity
           className="bg-blue-500 p-3 rounded-full mt-4"
-          onPress={searchRecipes(isIngredients)}
-          disabled={loading} 
+          onPress={() => searchRecipes(isIngredients)}
+          disabled={loading}
         >
           <Text className="text-white font-bold text-center">Search</Text>
         </TouchableOpacity>
@@ -181,7 +190,7 @@ const RecipeList = () => {
         <TouchableOpacity
           className="bg-title p-3 rounded-full mt-4"
           onPress={toggleIngredientsSort}
-          disabled={loading} 
+          disabled={loading}
         >
           <Text className="text-white font-bold text-center">{isIngredients ? 'Unsort by your ingredients' : 'Sort by your ingredients'}</Text>
         </TouchableOpacity>
@@ -201,10 +210,10 @@ const RecipeList = () => {
                 {isIngredients && (
                   <>
                     <Text className="text-md font-poppingsRegular text-center text-secondary">
-                      Ingredients: {item.usedIngredients && item.usedIngredients.length > 0 ? item.usedIngredients.map(ingredient => ingredient.name).join(', '): ""}
+                      Ingredients: {item.usedIngredients && item.usedIngredients.length > 0 ? item.usedIngredients.map(ingredient => ingredient.name).join(', ') : ""}
                     </Text>
                     <Text className="text-md font-poppingsRegular text-center text-secondary">
-                      Missing Ingredients: {item.missedIngredients && item.missedIngredients.length > 0 ? item.missedIngredients.map(ingredient => ingredient.name).join(', '): ""}
+                    {item.missedIngredients && item.missedIngredients.length > 0 ? "Missing Ingredients: " +  item.missedIngredients.map(ingredient => ingredient.name).join(', ') : ""}
                     </Text>
                   </>
                 )}

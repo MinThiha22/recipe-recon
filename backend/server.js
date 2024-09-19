@@ -26,6 +26,7 @@ app.get("/api/recipeSearch", async (req, res) => {
                 query: query,
                 number: 10,
                 includeIngredients: ingredients,
+                fillIngredients: true,
                 sort: 'min-missing-ingredients',
                 apiKey: process.env.SPOONACULAR_API_KEY
             },
@@ -39,15 +40,15 @@ app.get("/api/recipeSearch", async (req, res) => {
 });
 
 app.get("/api/ingredientsSearch", async (req, res) => {
-    const { query } = req.query;
-    if (!query) {
-        return res.status(400).json({ error: "Query parameter is required" });
+    const { ingredients } = req.query;
+    if (!ingredients) {
+        return res.status(400).json({ error: "Ingredients parameter is required" });
     }
 
     try {
         const response = await axios.get("https://api.spoonacular.com/recipes/findByIngredients", {
             params: {
-                ingredients: query,
+                ingredients: ingredients,
                 number: 10,
                 ranking: 2,
                 apiKey: process.env.SPOONACULAR_API_KEY
