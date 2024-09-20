@@ -34,7 +34,7 @@ Install required dependencies.
 Install Expo Go on your mobile device or use IOS simulator.
 
 ## Usage
-To fully test application including Image Recognition and Recipe Generation functionalities please contact Product Owner (Min Thiha Ko Ko (Mike) (minthihakoko@gmail.com) or Dan Thrope at to get API key.
+To fully test application including Image Recognition and Recipe Generation functionalities please contact Product Owner Min Thiha Ko Ko (Mike) (minthihakoko@gmail.com) or Dan Thrope to get API key.
 
 
 ## Team
