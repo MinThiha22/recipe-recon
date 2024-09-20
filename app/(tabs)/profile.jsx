@@ -1,9 +1,10 @@
-import { Alert, View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
-import { useEffect, useState } from "react";
+import { Alert, View, Text, ScrollView, TouchableOpacity, Image} from "react-native";
+import { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import CustomButton from "../../components/CustomButton";
 import { useGlobalContext } from "../../context/GlobalProvider";
+import { useFocusEffect } from '@react-navigation/native';
 import {
   logout,
   getCurrentUserData,
@@ -58,10 +59,10 @@ const Profile = () => {
       const userId = user.uid;
       const { username, email } = await getCurrentUserData();
       const profilePicture = await getProfilePicture(userId);
-      
+
       const savedIngredients = await getIngredients(userId).catch(() => []);
-      const favourites = await getFavourites(userId).catch(() => []); 
-      
+      const favourites = await getFavourites(userId).catch(() => []);
+
       setUserData({ username, email, profilePicture, savedIngredients, favourites });
     } catch (error) {
       console.log(error.message);
@@ -69,6 +70,12 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      getData();
+    }, [])
+  );
 
   useEffect(() => {
     getData();
@@ -257,7 +264,7 @@ const Profile = () => {
               <Image source={icons.addIcon} className="w-[15px] h-[15px]" ></Image>
             </TouchableOpacity>
           </View>
-          
+
 
           <View className="flex-col items-center mt-5">
             <Text className="text-lg font-poppinsBold text-secondary">
@@ -282,7 +289,7 @@ const Profile = () => {
               <>
                 <View className="pt-2">
                   {userData.savedIngredients &&
-                  userData.savedIngredients.length > 0 ? (
+                    userData.savedIngredients.length > 0 ? (
                     userData.savedIngredients.map((item, index) => (
                       <View
                         key={index}
@@ -334,7 +341,17 @@ const Profile = () => {
               <>
                 <View className="pt-2">
                   {userData.favourites && userData.favourites.length > 0 ? (
-                    <Text className="font-poppingsRegular text-secondary">{userData.favourites.summary}</Text>
+                    userData.favourites.map((item, index) => (
+                      <View
+                        key={index}
+                        className="bg-secondary p-4 mb-2 rounded-md w-[90%]"
+                      >
+                        {console.log(item.name.title)}
+                        <Text className="font-poppinsRegular text-primary text-lg">
+                          {item.name.title}
+                        </Text>
+                      </View>
+                    ))
                   ) : (
                     <Text className="font-poppingsRegular text-secondary">
                       No favourite recipes
