@@ -59,7 +59,7 @@
 
     return (
       <View className="bg-primary flex-1">
-        <View className="pt-4">
+        <View className="pt-20">
           <Text className="text-4xl font-chewy text-center text-title">Your Shopping List</Text>
         </View>
         <View className="p-4 flex-row items-center">
