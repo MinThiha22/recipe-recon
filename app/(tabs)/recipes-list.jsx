@@ -13,6 +13,7 @@ const RecipeList = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [favouriteList, setFavouriteList] = useState([]);
+  const [recentList, setRecentList] = useState([]);
   const [user, setUser] = useState(null);
   const [isSortByIngredients, setIsSortByIngredients] = useState(false);
   const [ingredientsList, setIngredientsList] = useState([]);
@@ -25,7 +26,7 @@ const RecipeList = () => {
 
     //refresh ingredients
     if (user && currentIsSortByIngredients) {
-      await fetchIngredients(user.uid); 
+      await fetchIngredients(user.uid);
     }
 
     const ingredients = ingredientsList.join(',');
@@ -76,6 +77,7 @@ const RecipeList = () => {
       console.log(recipeInfo);
       setSelectedRecipe(recipeInfo);
       setModalVisible(true);
+      addRecents(recipeInfo);
     } catch (err) {
       setError('Failed to fetch recipes');
     } finally {
@@ -97,6 +99,7 @@ const RecipeList = () => {
     if (currentUser) {
       fetchFavourites(currentUser.uid);
       fetchIngredients(currentUser.uid);
+      fetchRecents(currentUser.uid);
     }
   }, []);
 
@@ -169,6 +172,36 @@ const RecipeList = () => {
     });
   };
 
+  //get recents from firebase
+  const fetchRecents = async (userId) => {
+    const docRef = doc(db, 'recents', userId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      setRecentList(docSnap.data().list);
+    }
+  };
+
+  //save recents to firebase
+  const saveRecents = async (updatedList) => {
+    if (user) {
+      const userRecentsRef = doc(db, 'recents', user.uid);
+      await setDoc(userRecentsRef, { list: updatedList });
+    }
+  };
+
+  //add recents to item list and firebase
+  const addRecents = (recipeInfo) => {
+    const newItem = { id: recipeInfo.id, name: recipeInfo };
+
+    const recipeExists = recentList.some((item) => item.id === newItem.id);
+    if (!recipeExists) {
+      const updatedRecentList = [...recentList, newItem];
+      setRecentList(updatedRecentList);
+      saveRecents(updatedRecentList);
+    }
+  };
+
   return (
     <SafeAreaView className="bg-primary h-full">
       <View className="flex-1 p-4">
@@ -205,7 +238,8 @@ const RecipeList = () => {
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View className="mb-4 bg-primary">
-              <TouchableOpacity className="flex-1 items-center justify-center" onPress={() => imagePressed(item.id)}>
+              <TouchableOpacity className="flex-1 items-center justify-center" onPress={() => imagePressed(item.id)
+              }>
                 <Image className="w-60 h-60" source={{ uri: item.image }} />
                 <Text className="text-2xl font-chewy text-center text-title">{item.title}</Text>
                 {isSortByIngredients && (
@@ -214,7 +248,7 @@ const RecipeList = () => {
                       Ingredients: {item.usedIngredients && item.usedIngredients.length > 0 ? item.usedIngredients.map(ingredient => ingredient.name).join(', ') : ""}
                     </Text>
                     <Text className="text-md font-poppingsRegular text-center text-secondary">
-                    {item.missedIngredients && item.missedIngredients.length > 0 ? "Missing Ingredients: " +  item.missedIngredients.map(ingredient => ingredient.name).join(', ') : ""}
+                      {item.missedIngredients && item.missedIngredients.length > 0 ? "Missing Ingredients: " + item.missedIngredients.map(ingredient => ingredient.name).join(', ') : ""}
                     </Text>
                   </>
                 )}
@@ -254,7 +288,7 @@ const RecipeList = () => {
           </Modal>
         )}
       </View>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 
