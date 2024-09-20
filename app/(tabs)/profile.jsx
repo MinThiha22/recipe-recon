@@ -1,4 +1,4 @@
-import { Alert, View, Text, ScrollView, TouchableOpacity, Image} from "react-native";
+import { Alert, View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -15,6 +15,7 @@ import {
   deleteIngredient,
   deleteAllIngredients,
   getFavourites,
+  getRecents,
 } from "../../lib/firebase";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
@@ -62,8 +63,9 @@ const Profile = () => {
 
       const savedIngredients = await getIngredients(userId).catch(() => []);
       const favourites = await getFavourites(userId).catch(() => []);
+      const recents = await getRecents(userId).catch(() => []);
 
-      setUserData({ username, email, profilePicture, savedIngredients, favourites });
+      setUserData({ username, email, profilePicture, savedIngredients, favourites, recents });
     } catch (error) {
       console.log(error.message);
     } finally {
@@ -367,6 +369,43 @@ const Profile = () => {
               </>
             )}
           </View>
+
+          <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
+
+          <View className="items-center">
+            <Text className="text-lg font-poppinsBold text-secondary">
+              Recent Recipes
+            </Text>
+            {isLoading && (
+              <Text className=" text-secondary font-poppingsRegular">
+                Loading...Please wait...
+              </Text>
+            )}
+            {!isLoading && (
+              <>
+                <View className="pt-2">
+                  {userData.recents && userData.recents.length > 0 ? (
+                    userData.recents.reverse().slice(0,5).map((item, index) => (
+                      <View
+                        key={index}
+                        className="bg-secondary p-4 mb-2 rounded-md w-[90%]"
+                      >
+                        {console.log(item.name.title)}
+                        <Text className="font-poppinsRegular text-primary text-lg">
+                          {item.name.title}
+                        </Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text className="font-poppingsRegular text-secondary">
+                      No favourite recipes
+                    </Text>
+                  )}
+                </View>
+              </>
+            )}
+          </View>
+
 
           <CustomButton
             title="Log Out"
