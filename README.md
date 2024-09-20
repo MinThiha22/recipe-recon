@@ -25,10 +25,17 @@ Simply scan the ingredients you have on hand, and our app will suggest mouth-wat
 - **Community** - Users can share their favourite recipes, rate and review other users’ recipes, and participate in a community forum for cooking tips and advice.
 
 ## Installation
+Clone the repository on your local
+```bash
+   git clone https://github.com/MinThiha22/recipe-recon.git
+```
+Install required dependencies.
 
+Install Expo Go on your mobile device or use IOS simulator.
 
 ## Usage
-To fully test application including Image Recognition and Recipe Generation functionalities please contact Product Owner (Min Thiha Ko Ko (Mike) at minthihakoko@gmail.com to get API key.
+To fully test application including Image Recognition and Recipe Generation functionalities please contact Product Owner (Min Thiha Ko Ko (Mike) (minthihakoko@gmail.com) or Dan Thrope at to get API key.
+
 
 ## Team
 ### Developers
