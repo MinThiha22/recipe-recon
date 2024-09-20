@@ -350,12 +350,12 @@ const Profile = () => {
                         key={index}
                         className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
                       >
-                
+
                         <View className="flex-col items-center justify-center">
-                          <Image className="w-60 h-60" source={{ uri: item.name.image }}/>
+                          <Image className="w-60 h-60" source={{ uri: item.name.image }} />
                           <Text className="font-poppinsRegular text-black text-lg">
-                          {item.name.title}
-                        </Text>
+                            {item.name.title}
+                          </Text>
                         </View>
                       </View>
                     ))
@@ -387,11 +387,15 @@ const Profile = () => {
                     userData.recents.reverse().slice(0,5).map((item, index) => (
                       <View
                         key={index}
-                        className="bg-secondary p-4 mb-2 rounded-md w-[90%]"
+                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
                       >
-                        <Text className="font-poppinsRegular text-primary text-lg">
-                          {item.name.title}
-                        </Text>
+
+                        <View className="flex-col items-center justify-center">
+                          <Image className="w-60 h-60" source={{ uri: item.name.image }} />
+                          <Text className="font-poppinsRegular text-black text-lg">
+                            {item.name.title}
+                          </Text>
+                        </View>
                       </View>
                     ))
                   ) : (
