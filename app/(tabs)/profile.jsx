@@ -157,6 +157,7 @@ const Profile = () => {
     }
   };
 
+  // uploadImage to firebase storage
   const uploadImage = async (uri) => {
     setUploading(true);
     try {
@@ -185,6 +186,7 @@ const Profile = () => {
     }
   };
 
+  // delete one ingredient from saved ingredients
   const deleteOne = async (ingredient) => {
     setIsSumbitting(true);
     try {
@@ -207,6 +209,7 @@ const Profile = () => {
     }
   };
 
+  // delete all ingredients
   const deleteAll = async () => {
     setIsSumbitting(true);
     try {
@@ -278,7 +281,7 @@ const Profile = () => {
 
           <View className="items-center">
             <Text className="text-lg font-poppinsBold text-secondary">
-              Your saved ingredients
+              Saved ingredients
             </Text>
             {isLoading && (
               <Text className=" text-secondary font-poppingsRegular">
@@ -295,7 +298,7 @@ const Profile = () => {
                         key={index}
                         className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
                       >
-                        <Text className="font-poppingsRegular text-secondary">
+                        <Text className="font-poppingsRegular font-bold text-secondary">
                           {item}
                         </Text>
                         <TouchableOpacity onPress={() => deleteOne(item)}>
@@ -344,12 +347,15 @@ const Profile = () => {
                     userData.favourites.map((item, index) => (
                       <View
                         key={index}
-                        className="bg-secondary p-4 mb-2 rounded-md w-[90%]"
+                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
                       >
-                        {console.log(item.name.title)}
-                        <Text className="font-poppinsRegular text-primary text-lg">
+                
+                        <View className="flex-col items-center justify-center">
+                          <Image className="w-60 h-60" source={{ uri: item.name.image }}/>
+                          <Text className="font-poppinsRegular text-black text-lg">
                           {item.name.title}
                         </Text>
+                        </View>
                       </View>
                     ))
                   ) : (
