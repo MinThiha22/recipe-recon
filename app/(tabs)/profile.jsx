@@ -64,7 +64,6 @@ const Profile = () => {
       const savedIngredients = await getIngredients(userId).catch(() => []);
       const favourites = await getFavourites(userId).catch(() => []);
       const recents = await getRecents(userId).catch(() => []);
-
       setUserData({ username, email, profilePicture, savedIngredients, favourites, recents });
     } catch (error) {
       console.log(error.message);
@@ -259,7 +258,7 @@ const Profile = () => {
               <Image
                 source={images.profilePlaceHolder}
                 resizeMode="contain"
-                className="w-[30px] h-[30px] rounded-full"
+                className="w-[120px] h-[120px] rounded-full"
               ></Image>
             )}
             <TouchableOpacity
@@ -390,7 +389,6 @@ const Profile = () => {
                         key={index}
                         className="bg-secondary p-4 mb-2 rounded-md w-[90%]"
                       >
-                        {console.log(item.name.title)}
                         <Text className="font-poppinsRegular text-primary text-lg">
                           {item.name.title}
                         </Text>
