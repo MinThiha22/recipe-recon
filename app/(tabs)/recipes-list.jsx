@@ -29,17 +29,25 @@ const RecipeList = () => {
       await fetchIngredients(user.uid);
     }
 
-    const ingredients = ingredientsList.join(',');
+    let ingredients = ingredientsList.join(',');
     let endpoint = null;
     let param = {};
+    let sort = null;
     if (query.trim()) {
-      //if search bar is not empty and sorting by ingredients use ingredients endpoint, if not sorting by ingredients use default endpoint
+      //if search bar is not empty and sorting by ingredients and query, if not sort by query
       endpoint = 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch';
 
-      //if sorting by ingredients use parameters query and ingredients else use query
-      param = { query, ingredients };
+      ingredients = currentIsSortByIngredients
+      ? ingredientsList.join(',')
+      : '';
+
+      sort = currentIsSortByIngredients
+      ? 'min-missing-ingredients'
+      : 'popularity';
+      
+      param = { query, ingredients, sort };
     } else {
-      //if search bar is empty and sorting by ingredients use ingredients search endpoint, if ot sorting by ingredients use random endpoint
+      //if search bar is empty and sorting by ingredients use ingredients search endpoint, if sorting by ingredients use random endpoint
       endpoint = currentIsSortByIngredients
         ? 'https://roughy-polite-wholly.ngrok-free.app/api/ingredientsSearch'
         : 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/random';
