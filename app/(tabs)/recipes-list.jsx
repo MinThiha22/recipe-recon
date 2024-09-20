@@ -14,17 +14,17 @@ const RecipeList = () => {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [favouriteList, setFavouriteList] = useState([]);
   const [user, setUser] = useState(null);
-  const [isIngredients, setIsIngredients] = useState(false);
+  const [isSortByIngredients, setIsSortByIngredients] = useState(false);
   const [ingredientsList, setIngredientsList] = useState([]);
 
   //get api recipes data from server
-  const searchRecipes = async (currentIsIngredients) => {
+  const searchRecipes = async (currentIsSortByIngredients) => {
     setRecipes();
     setLoading(true);
     setError('');
 
     //refresh ingredients
-    if (user && currentIsIngredients) {
+    if (user && currentIsSortByIngredients) {
       await fetchIngredients(user.uid); 
     }
 
@@ -39,12 +39,12 @@ const RecipeList = () => {
       param = { query, ingredients };
     } else {
       //if search bar is empty and sorting by ingredients use ingredients search endpoint, if ot sorting by ingredients use random endpoint
-      endpoint = currentIsIngredients
+      endpoint = currentIsSortByIngredients
         ? 'https://roughy-polite-wholly.ngrok-free.app/api/ingredientsSearch'
         : 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/random';
 
       //if sorting by ingredients use ingredients parameter else use no paramters 
-      param = currentIsIngredients
+      param = currentIsSortByIngredients
         ? { ingredients }
         : {};
     }
@@ -63,8 +63,8 @@ const RecipeList = () => {
 
   //call search recipes on start
   useEffect(() => {
-    searchRecipes(isIngredients);
-  }, [isIngredients]);
+    searchRecipes(isSortByIngredients);
+  }, [isSortByIngredients]);
 
   //get specific recipe information from server when recipe is pressed
   const imagePressed = async (id) => {
@@ -162,8 +162,8 @@ const RecipeList = () => {
 
   //toggle ingredient sort and update the search
   const toggleIngredientsSort = () => {
-    setIsIngredients(prevIsIngredients => {
-      const newIsIngredients = !prevIsIngredients;
+    setIsSortByIngredients(prevIsSortByIngredients => {
+      const newIsIngredients = !prevIsSortByIngredients;
       searchRecipes(newIsIngredients);
       return newIsIngredients;
     });
@@ -182,7 +182,7 @@ const RecipeList = () => {
 
         <TouchableOpacity
           className="bg-blue-500 p-3 rounded-full mt-4"
-          onPress={() => searchRecipes(isIngredients)}
+          onPress={() => searchRecipes(isSortByIngredients)}
           disabled={loading}
         >
           <Text className="text-white font-bold text-center">Search</Text>
@@ -193,7 +193,7 @@ const RecipeList = () => {
           onPress={toggleIngredientsSort}
           disabled={loading}
         >
-          <Text className="text-white font-bold text-center">{isIngredients ? 'Unsort by your ingredients' : 'Sort by your ingredients'}</Text>
+          <Text className="text-white font-bold text-center">{isSortByIngredients ? 'Unsort by your ingredients' : 'Sort by your ingredients'}</Text>
         </TouchableOpacity>
 
         {loading && <Text className="text-3xl pt-10 font-chewy text-center text-title">Loading...</Text>}
@@ -208,7 +208,7 @@ const RecipeList = () => {
               <TouchableOpacity className="flex-1 items-center justify-center" onPress={() => imagePressed(item.id)}>
                 <Image className="w-60 h-60" source={{ uri: item.image }} />
                 <Text className="text-2xl font-chewy text-center text-title">{item.title}</Text>
-                {isIngredients && (
+                {isSortByIngredients && (
                   <>
                     <Text className="text-md font-poppingsRegular text-center text-secondary">
                       Ingredients: {item.usedIngredients && item.usedIngredients.length > 0 ? item.usedIngredients.map(ingredient => ingredient.name).join(', ') : ""}
