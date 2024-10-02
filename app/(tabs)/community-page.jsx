@@ -27,8 +27,10 @@ const CommunityPage = () => {
         <View className="m-2 p-4 bg-white rounded-lg shadow">
             <Text className="font-bold text-lg">{item.title}</Text>
             <Text className="text-gray-600">{item.body}</Text>
-            <Text className="text-gray-400 text-sm">{item.username}</Text>
-            <Image className="w-60 h-60" source={{ uri: item.profilePicture }} />
+            <View className="flex-row items-center mt-2">
+                <Image className="w-5 h-5 mr-1 rounded-full border-black border-1" source={{ uri: item.profilePicture }}/>
+            <Text className="text-gray-400 text-sm">{item.name}</Text>
+            </View>
         </View>
     );
 
@@ -50,7 +52,7 @@ const CommunityPage = () => {
                         showsVerticalScrollIndicator={false} 
                         ListHeaderComponent={displayHeader}
                     />
-                <TouchableOpacity className="bg-blue-500 p-3 rounded-full absolute bottom-5 right-5 w-15 h-15" onPress={() => setModalVisible(true)}>
+                <TouchableOpacity className="bg-blue-500 p-3 rounded-full absolute bottom-1 right-5 w-15 h-15" onPress={() => setModalVisible(true)}>
                     <Text className="text-white font-bold text-center">Create Post</Text>
                 </TouchableOpacity>
                 <Modal
@@ -59,7 +61,7 @@ const CommunityPage = () => {
                     visible={modalVisible}
                     onRequestClose={() => setModalVisible(false)}
                 >
-                <CreatePost  onClose={() => setModalVisible(false)}></CreatePost>
+                    <CreatePost  onClose={() => setModalVisible(false)}></CreatePost>
                 </Modal>
 
         </SafeAreaView>
