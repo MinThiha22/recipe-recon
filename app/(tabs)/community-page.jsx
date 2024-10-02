@@ -26,6 +26,7 @@ const CommunityPage = () => {
     const displayPosts = ({ item }) => (
         <View className="m-2 p-4 bg-white rounded-lg shadow">
             <Text className="font-bold text-lg">{item.title}</Text>
+            {item.imageUrl && (<Image className='w-60 h-60' source={{ uri: item.imageUrl}}></Image>)}
             <Text className="text-gray-600">{item.body}</Text>
             <View className="flex-row items-center mt-2">
                 <Image className="w-5 h-5 mr-1 rounded-full border-black border-1" source={{ uri: item.profilePicture }}/>
