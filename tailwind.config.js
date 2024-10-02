@@ -6,7 +6,7 @@ module.exports = {
       colors: {
         primary: "#405D72",
         title: "#FFA726",
-        secondary: "#F7E7DC"
+        secondary: "#F7E7DC",
       },
       fontFamily: {
         chewy: ["Chewy-Regular","sans-serif"],

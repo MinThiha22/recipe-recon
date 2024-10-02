@@ -83,6 +83,21 @@ const TabLayout = () => {
           }}
         />
         <Tabs.Screen 
+          name = "community-page"
+          options={{
+            title: 'Community Page',
+            headerShown: false,
+            tabBarIcon: ({ color, focused }) => (
+              <TabIcon 
+                  icon={icons.bookmark}
+                  color={color}
+                  name="Bookmark"
+                  focused={focused}
+              />
+          )
+          }}
+        />
+        <Tabs.Screen 
           name = "profile"
           options={{
             title: 'Profile',
