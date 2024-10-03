@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Modal, SafeAreaView, ScrollView, Image } from 'react-native';
-import CreatePost from '../../components/Create-post';
+import CreatePost from '../../components/CreatePost';
 import { db } from '../../lib/firebase';
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import Comments from '../../components/Comments';

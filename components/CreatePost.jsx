@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Alert, Text, TouchableOpacity, TextInput, View, Image, KeyboardAvoidingView, Platform } from "react-native";
 import { db, auth, getCurrentUserData, getProfilePicture, uploadPicture } from '../lib/firebase.js';
 import { doc, setDoc } from 'firebase/firestore';
-import { images, icons } from "../constants";
+import { images, icons } from "../constants/index.js";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 
