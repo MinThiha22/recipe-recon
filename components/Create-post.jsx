@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Alert, Text, TouchableOpacity, TextInput, View, Image, KeyboardAvoidingView, Platform  } from "react-native";
+import { Alert, Text, TouchableOpacity, TextInput, View, Image, KeyboardAvoidingView, Platform } from "react-native";
 import { db, auth, getCurrentUserData, getProfilePicture, uploadPicture } from '../lib/firebase.js';
 import { collection, addDoc } from 'firebase/firestore';
 import { images, icons } from "../constants";
@@ -35,6 +35,7 @@ const CreatePost = ({ onClose }) => {
                 });
                 setTitle('');
                 setBody('');
+                setImage('');
                 onClose();
             } catch (error) {
                 console.error('Error posting:', error);
@@ -153,13 +154,21 @@ const CreatePost = ({ onClose }) => {
         }
     };
 
+    const onCloseModal = () => {
+        setImage('');
+        setTitle('');
+        setBody('');
+        onClose();
+    };
+    
+
     return (
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-className="flex-1 justify-center items-center m-5 curved p-5 rounded-lg">
-            <View className="w-11/12 max-w-md bg-primary p-5 rounded-xl shadow-lg">
+            style={{ flex: 1 }}
+            className="flex-1 justify-start items-center m-5 curved p-5 rounded-lg">
+            <View className="w-11/12 max-w-md mt-24 bg-primary p-5 rounded-xl shadow-lg">
                 <Text className="text-3xl font-chewy text-center text-title">Create Post</Text>
-                <TouchableOpacity className=" p-3 rounded-full absolute top-0 right-0 w-10 h-10" onPress={onClose}>
+                <TouchableOpacity className=" p-3 rounded-full absolute top-0 right-0 w-10 h-10" onPress={onCloseModal}>
                     <Text className="text-white font-bold text-center text-md ">x</Text>
                 </TouchableOpacity>
                 <TextInput
@@ -176,7 +185,7 @@ className="flex-1 justify-center items-center m-5 curved p-5 rounded-lg">
                             <Image
                                 source={{ uri: image }}
                                 resizeMode="contain"
-                                className="bg-secondary w-[150px] h-[150px] border-black border-2"
+                                className="bg-secondary w-[100px] h-[100px] border-black border-2"
                             />
                         </TouchableOpacity>
                     ) : (
@@ -189,12 +198,13 @@ className="flex-1 justify-center items-center m-5 curved p-5 rounded-lg">
                     )}
                 </View>
                 <TextInput
-                    className="border border-gray-300 p-2 mt-2 text-secondary"
-                    placeholder="Enter Post"
+                    className="border border-gray-300 sp-2 mt-2 text-secondary"
+                    style={{ height: image ? 128  : 200  }}
+                    placeholder=" Enter Post"
                     value={body}
                     onChangeText={setBody}
                     multiline={true}
-                    numberOfLines={4} />
+                    blurOnSubmit={false}/>
                 <TouchableOpacity
                     className="bg-blue-500 p-3 rounded-full mt-4"
                     onPress={post}

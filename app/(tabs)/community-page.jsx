@@ -9,7 +9,7 @@ const CommunityPage = () => {
 
     const [modalVisible, setModalVisible] = useState(false);
     const [posts, setPosts] = useState([]);
-    const [commentsVisible, setCommentsVisible] = useState({});
+    const [commentsVisible, setCommentsVisible] = useState(false);
 
     useEffect(() => {
         const q = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
@@ -34,29 +34,35 @@ const CommunityPage = () => {
 
     const displayPosts = ({ item }) => (
         <View>
-            {commentsVisible[item.id] ? (
-                <View className="m-2 p-4 bg-white rounded-lg shadow">
-                    <TouchableOpacity className="bg-blue-500 p-3 rounded-full" onPress={() => toggleCommentsVisibility(item.id)}>
-                        <Text className="text-white font-bold text-center">Hide Comments</Text>
-                    </TouchableOpacity>
-                    <Comments postId={item.id} />
+            <View className="m-2 p-4 bg-white rounded-lg shadow">
+                <Text className="font-bold text-lg">{item.title}</Text>
+                {item.imageUrl && (<Image className='w-60 h-60' source={{ uri: item.imageUrl }}></Image>)}
+                <Text className="text-gray-600">{item.body}</Text>
+                <View className="flex-row items-center mt-2">
+                    <Image className="w-5 h-5 mr-1 rounded-full border-black border-1" source={{ uri: item.profilePicture }} />
+                    <Text className="text-gray-400 text-sm">{item.name}</Text>
                 </View>
-            ) : (
                 <View>
-                    <View className="m-2 p-4 bg-white rounded-lg shadow">
-                        <Text className="font-bold text-lg">{item.title}</Text>
-                        {item.imageUrl && (<Image className='w-60 h-60' source={{ uri: item.imageUrl }}></Image>)}
-                        <Text className="text-gray-600">{item.body}</Text>
-                        <View className="flex-row items-center mt-2">
-                            <Image className="w-5 h-5 mr-1 rounded-full border-black border-1" source={{ uri: item.profilePicture }} />
-                            <Text className="text-gray-400 text-sm">{item.name}</Text>
-                        </View>
-                        <TouchableOpacity className="bg-blue-500 p-3 rounded-full mt-4" onPress={() => toggleCommentsVisibility(item.id)}>
-                            <Text className="text-white font-bold text-center">View Comments</Text>
+                    <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => setCommentsVisible(true)}>
+                        <Text className="text-white font-bold text-center">View Comments</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={commentsVisible}
+                onRequestClose={() => setCommentsVisible(false)}
+            >
+                <View className="flex-1 justify-end">
+                    <View className="h-3/4 bg-white rounded-lg shadow pl-4 pr-4">
+                        <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => setCommentsVisible(false)}>
+                            <Text className="text-white font-bold text-center">Hide Comments</Text>
                         </TouchableOpacity>
+                        <Comments postId={item.id} />
                     </View>
                 </View>
-            )}
+            </Modal>
         </View >
     );
 

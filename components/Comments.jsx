@@ -76,7 +76,7 @@ const Comments = ({ postId }) => {
                 onChangeText={setComment}
             />
             <TouchableOpacity
-                className="bg-blue-500 p-3 mt-2 rounded-full"
+                className="bg-primary p-3 mt-2 rounded-full"
                 onPress={addComment}>
                 <Text className="text-white font-bold text-center">Comment</Text>
             </TouchableOpacity>
