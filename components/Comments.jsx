@@ -37,7 +37,6 @@ const Comments = ({ postId }) => {
         else {
             setCommentSection([]);
         }
-        console.log(commentSection);
     };
 
     const saveComments = async (updatedList) => {
@@ -68,6 +67,20 @@ const Comments = ({ postId }) => {
 
     return (
         <View>
+            <View className="flex-row items-center justify-between">
+            <TextInput
+                className="border border-gray-300 mt-2 p-2 flex-1 mr-2 text-primary"
+                placeholder="Enter Comment"
+                placeholderTextColor="#405D72"
+                value={comment}
+                onChangeText={setComment}
+            />
+            <TouchableOpacity
+                className="bg-blue-500 p-3 mt-2 rounded-full"
+                onPress={addComment}>
+                <Text className="text-white font-bold text-center">Comment</Text>
+            </TouchableOpacity>
+            </View>
             {commentSection && (
                 <FlatList
                     data={commentSection}
@@ -77,18 +90,6 @@ const Comments = ({ postId }) => {
                     showsVerticalScrollIndicator={false}
                 />
             )}
-            <TextInput
-                className="border border-gray-300 p-2 text-primary"
-                placeholder="Enter Comment"
-                placeholderTextColor="#405D72"
-                value={comment}
-                onChangeText={setComment}
-            />
-            <TouchableOpacity
-                className="bg-blue-500 p-3 rounded-full mt-4"
-                onPress={addComment}>
-                <Text className="text-white font-bold text-center">Comment</Text>
-            </TouchableOpacity>
         </View>
 
     );

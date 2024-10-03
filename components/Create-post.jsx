@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Alert, Text, TouchableOpacity, TextInput, View, Image } from "react-native";
+import { Alert, Text, TouchableOpacity, TextInput, View, Image, KeyboardAvoidingView, Platform  } from "react-native";
 import { db, auth, getCurrentUserData, getProfilePicture, uploadPicture } from '../lib/firebase.js';
 import { collection, addDoc } from 'firebase/firestore';
 import { images, icons } from "../constants";
@@ -154,7 +154,9 @@ const CreatePost = ({ onClose }) => {
     };
 
     return (
-        <View className="flex-1 justify-center items-center m-5 curved p-5 rounded-lg">
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+className="flex-1 justify-center items-center m-5 curved p-5 rounded-lg">
             <View className="w-11/12 max-w-md bg-primary p-5 rounded-xl shadow-lg">
                 <Text className="text-3xl font-chewy text-center text-title">Create Post</Text>
                 <TouchableOpacity className=" p-3 rounded-full absolute top-0 right-0 w-10 h-10" onPress={onClose}>
@@ -200,7 +202,7 @@ const CreatePost = ({ onClose }) => {
                     <Text className="text-white font-bold text-center">Post</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </KeyboardAvoidingView >
     );
 }
 
