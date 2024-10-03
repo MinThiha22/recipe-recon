@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Modal, SafeAreaView, ScrollView, Image } from 'react-native';
-import CreatePost from '../../components/Create-post'
+import CreatePost from '../../components/Create-post';
 import { db } from '../../lib/firebase';
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import Comments from '../../components/Comments';
@@ -9,7 +9,7 @@ const CommunityPage = () => {
 
     const [modalVisible, setModalVisible] = useState(false);
     const [posts, setPosts] = useState([]);
-    const [commentsVisible, setCommentsVisible] = useState(false);
+    const [commentsVisible, setCommentsVisible] = useState(null);
 
     useEffect(() => {
         const q = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
@@ -26,13 +26,10 @@ const CommunityPage = () => {
     }, []);
 
     const toggleCommentsVisibility = (postId) => {
-        setCommentsVisible(prevState => ({
-            ...prevState,
-            [postId]: !prevState[postId]
-        }));
+        setCommentsVisible((prev) => prev === postId ? null : postId);
     };
 
-    const displayPosts = ({ item }) => (
+    const displayPosts = ({ item }) => (    
         <View>
             <View className="m-2 p-4 bg-white rounded-lg shadow">
                 <Text className="font-bold text-lg">{item.title}</Text>
@@ -43,7 +40,7 @@ const CommunityPage = () => {
                     <Text className="text-gray-400 text-sm">{item.name}</Text>
                 </View>
                 <View>
-                    <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => setCommentsVisible(true)}>
+                    <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => toggleCommentsVisibility(item.id)}>
                         <Text className="text-white font-bold text-center">View Comments</Text>
                     </TouchableOpacity>
                 </View>
@@ -51,15 +48,15 @@ const CommunityPage = () => {
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={commentsVisible}
-                onRequestClose={() => setCommentsVisible(false)}
+                visible={commentsVisible === item.postId} 
+                onRequestClose={() => setCommentsVisible(null)}
             >
-                <View className="flex-1 justify-end">
+                <View className="flex-1 m-2 justify-end">
                     <View className="h-3/4 bg-white rounded-lg shadow pl-4 pr-4">
-                        <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => setCommentsVisible(false)}>
+                        <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => setCommentsVisible(null)}>
                             <Text className="text-white font-bold text-center">Hide Comments</Text>
                         </TouchableOpacity>
-                        <Comments postId={item.id} />
+                        <Comments postId={item.postId} />
                     </View>
                 </View>
             </Modal>

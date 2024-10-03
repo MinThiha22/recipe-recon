@@ -201,7 +201,6 @@ const RecipeList = () => {
   //add recents to item list and firebase
   const addRecents = (recipeInfo) => {
     const newItem = { id: recipeInfo.id, name: recipeInfo };
-
     const recipeExists = recentList.some((item) => item.id === newItem.id);
     if (!recipeExists) {
       const updatedRecentList = [...recentList, newItem];

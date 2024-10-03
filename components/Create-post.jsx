@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Alert, Text, TouchableOpacity, TextInput, View, Image, KeyboardAvoidingView, Platform } from "react-native";
 import { db, auth, getCurrentUserData, getProfilePicture, uploadPicture } from '../lib/firebase.js';
-import { collection, addDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { images, icons } from "../constants";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,7 +22,7 @@ const CreatePost = ({ onClose }) => {
         if (title && body) {
             try {
                 const postId = `${Date.now()}_${user.uid}`
-                await addDoc(collection(db, 'posts'), {
+                await setDoc(doc(db, 'posts', postId), {
                     postId,
                     title,
                     body,
@@ -33,10 +33,7 @@ const CreatePost = ({ onClose }) => {
                     comments: [],
                     timestamp: new Date().toISOString(),
                 });
-                setTitle('');
-                setBody('');
-                setImage('');
-                onClose();
+                onCloseModal();
             } catch (error) {
                 console.error('Error posting:', error);
                 alert('Failed to post');
@@ -155,9 +152,10 @@ const CreatePost = ({ onClose }) => {
     };
 
     const onCloseModal = () => {
-        setImage('');
         setTitle('');
         setBody('');
+        setImage('');  
+        setImageUrl('');      
         onClose();
     };
     
