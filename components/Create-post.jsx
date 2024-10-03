@@ -19,28 +19,30 @@ const CreatePost = ({ onClose }) => {
 
     const post = async () => {
         await getData(user);
-        if(title && body) {
-        try {
-            await addDoc(collection(db, 'posts'), {
-                title,
-                body,
-                userId: user.uid,
-                name,
-                imageUrl,
-                profilePicture,
-                comments: [],
-                timestamp: new Date().toISOString(),
-            });
-            setTitle('');
-            setBody('');
-            onClose();
-        } catch (error) {
-            console.error('Error posting:', error);
-            alert('Failed to post');
+        if (title && body) {
+            try {
+                const postId = `${Date.now()}_${user.uid}`
+                await addDoc(collection(db, 'posts'), {
+                    postId,
+                    title,
+                    body,
+                    userId: user.uid,
+                    name,
+                    imageUrl,
+                    profilePicture,
+                    comments: [],
+                    timestamp: new Date().toISOString(),
+                });
+                setTitle('');
+                setBody('');
+                onClose();
+            } catch (error) {
+                console.error('Error posting:', error);
+                alert('Failed to post');
+            }
+        } else {
+            alert("Please enter both a title and body.")
         }
-    } else {
-        alert("Please enter both a title and body.")
-    }
     };
 
     useEffect(() => {
@@ -180,7 +182,7 @@ const CreatePost = ({ onClose }) => {
                             onPress={pickImage}
                             className="mb-2 mt-2 p-2 bg-secondary rounded-full"
                         >
-                        <Ionicons name="camera" size={40} color="black" />
+                            <Ionicons name="camera" size={40} color="black" />
                         </TouchableOpacity>
                     )}
                 </View>
