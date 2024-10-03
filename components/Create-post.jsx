@@ -15,12 +15,14 @@ const CreatePost = ({ onClose }) => {
     const [profilePicture, setPicture] = useState(null);
     const [image, setImage] = useState('');
     const [imageUrl, setImageUrl] = useState('');
+    const [loading, setLoading] = useState(false);
 
 
     const post = async () => {
         await getData(user);
         if (title && body) {
             try {
+                setLoading(true);
                 const postId = `${Date.now()}_${user.uid}`
                 await setDoc(doc(db, 'posts', postId), {
                     postId,
@@ -37,6 +39,8 @@ const CreatePost = ({ onClose }) => {
             } catch (error) {
                 console.error('Error posting:', error);
                 alert('Failed to post');
+            } finally {
+                setLoading(false);
             }
         } else {
             alert("Please enter both a title and body.")
@@ -154,11 +158,11 @@ const CreatePost = ({ onClose }) => {
     const onCloseModal = () => {
         setTitle('');
         setBody('');
-        setImage('');  
-        setImageUrl('');      
+        setImage('');
+        setImageUrl('');
         onClose();
     };
-    
+
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -173,12 +177,14 @@ const CreatePost = ({ onClose }) => {
                     className="border border-gray-300 p-2 text-secondary"
                     placeholder="Enter Title"
                     value={title}
+                    editable={!loading}
                     onChangeText={setTitle} />
                 <View className="relative mt-3 items-center">
                     {image ? (
                         <TouchableOpacity
                             onPress={pickImage}
                             className="mb-2 mt-2 p-2 rounded-full"
+                            disabled={loading}
                         >
                             <Image
                                 source={{ uri: image }}
@@ -189,6 +195,7 @@ const CreatePost = ({ onClose }) => {
                     ) : (
                         <TouchableOpacity
                             onPress={pickImage}
+                            disabled={loading}
                             className="mb-2 mt-2 p-2 bg-secondary rounded-full"
                         >
                             <Ionicons name="camera" size={40} color="black" />
@@ -197,14 +204,16 @@ const CreatePost = ({ onClose }) => {
                 </View>
                 <TextInput
                     className="border border-gray-300 sp-2 mt-2 text-secondary"
-                    style={{ height: image ? 128  : 200  }}
+                    style={{ height: image ? 128 : 200 }}
                     placeholder=" Enter Post"
                     value={body}
                     onChangeText={setBody}
                     multiline={true}
-                    blurOnSubmit={false}/>
+                    editable={!loading}
+                    blurOnSubmit={false} />
                 <TouchableOpacity
                     className="bg-blue-500 p-3 rounded-full mt-4"
+                    disabled={loading}
                     onPress={post}
                 >
                     <Text className="text-white font-bold text-center">Post</Text>

@@ -29,16 +29,18 @@ const CommunityPage = () => {
         setCommentsVisible((prev) => prev === postId ? null : postId);
     };
 
-    const displayPosts = ({ item }) => (    
+    const displayPosts = ({ item }) => (
         <View>
             <View className="m-2 p-4 bg-white rounded-lg shadow">
-                <Text className="font-bold text-lg">{item.title}</Text>
-                {item.imageUrl && (<Image className='w-60 h-60' source={{ uri: item.imageUrl }}></Image>)}
-                <Text className="text-gray-600">{item.body}</Text>
-                <View className="flex-row items-center mt-2">
-                    <Image className="w-5 h-5 mr-1 rounded-full border-black border-1" source={{ uri: item.profilePicture }} />
-                    <Text className="text-gray-400 text-sm">{item.name}</Text>
+                <View className="items-center">
+                    <Text className="font-bold font-chewy text-xl">{item.title}</Text>
+                    {item.imageUrl && (<Image className='w-80 h-80' source={{ uri: item.imageUrl }}></Image>)}
                 </View>
+                    <Text className="text-gray-600 mt-2">{item.body}</Text>
+                    <View className="flex-row items-center mt-2">
+                        <Image className="w-5 h-5 mr-1 rounded-full border-black border-1" source={{ uri: item.profilePicture }} />
+                        <Text className="text-gray-400 text-sm">{item.name}</Text>
+                    </View>
                 <View>
                     <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => toggleCommentsVisibility(item.id)}>
                         <Text className="text-white font-bold text-center">View Comments</Text>
@@ -48,7 +50,7 @@ const CommunityPage = () => {
             <Modal
                 animationType="slide"
                 transparent={true}
-                visible={commentsVisible === item.postId} 
+                visible={commentsVisible === item.postId}
                 onRequestClose={() => setCommentsVisible(null)}
             >
                 <View className="flex-1 m-2 justify-end">

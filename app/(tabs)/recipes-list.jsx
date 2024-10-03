@@ -38,13 +38,13 @@ const RecipeList = () => {
       endpoint = 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch';
 
       ingredients = currentIsSortByIngredients
-      ? ingredientsList.join(',')
-      : '';
+        ? ingredientsList.join(',')
+        : '';
 
       sort = currentIsSortByIngredients
-      ? 'min-missing-ingredients'
-      : 'popularity';
-      
+        ? 'min-missing-ingredients'
+        : 'popularity';
+
       param = { query, ingredients, sort };
     } else {
       //if search bar is empty and sorting by ingredients use ingredients search endpoint, if sorting by ingredients use random endpoint
@@ -271,7 +271,7 @@ const RecipeList = () => {
             visible={modalVisible}
             onRequestClose={closeModal}
           >
-            <View className="flex-1 justify-center items-center m-5 bg-secondary p-5 rounded-lg">
+            <View className="flex-1 justify-center items-center m-3 bg-secondary p-4 rounded-lg shadow">
               <Image className="w-48 h-48" source={{ uri: selectedRecipe.image }} />
               <Text className="text-3xl font-chewy text-center text-title">{selectedRecipe.title}</Text>
               <RenderHtml
