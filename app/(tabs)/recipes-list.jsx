@@ -4,6 +4,7 @@ import axios from 'axios';
 import RenderHtml from 'react-native-render-html';
 import { db, auth } from '../../lib/firebase.js';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
+import Instructions from '../../components/Instructions.jsx';
 
 const RecipeList = () => {
   const [query, setQuery] = useState('');
@@ -292,6 +293,9 @@ const RecipeList = () => {
               >
                 <Text className="text-white font-bold text-center">{isFavourite(selectedRecipe.id) ? 'Unfavourite' : 'Favourite!'}</Text>
               </TouchableOpacity>
+
+              <Instructions id={selectedRecipe.id}/>
+
             </View>
           </Modal>
         )}

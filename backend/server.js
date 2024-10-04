@@ -103,6 +103,23 @@ app.get("/api/recipeSearch/random", async (req, res) => {
     }
 });
 
+app.get("/api/recipeInstructions", async (req, res) => {
+    const { query } = req.query;
+
+    try {
+        const response = await axios.get(`https://api.spoonacular.com/recipes/${query}/analyzedInstructions`, {
+            params: {
+                id: query,
+                apiKey: process.env.SPOONACULAR_API_KEY
+            },  
+        });
+        res.status(200).json(response.data);
+    } catch (error) {
+        console.error("Error fetching data from Spoonacular API:", error.message);
+        res.status(500).json({ error: "Failed to fetch data from Spoonacular API" });
+    }
+});
+
 
 const upload = multer({ storage: multer.memoryStorage() });
 
