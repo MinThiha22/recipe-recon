@@ -49,8 +49,8 @@ const RecipeList = () => {
     } else {
       //if search bar is empty and sorting by ingredients use ingredients search endpoint, if sorting by ingredients use random endpoint
       endpoint = currentIsSortByIngredients
-        ? 'https://roughy-polite-wholly.ngrok-free.app/api/ingredientsSearch'
-        : 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/random';
+        ? 'https://recipe-recon.onrender.com/api/ingredientsSearch'
+        : 'https://recipe-recon.onrender.com/api/recipeSearch/random';
 
       //if sorting by ingredients use ingredients parameter else use no paramters 
       param = currentIsSortByIngredients
@@ -78,7 +78,7 @@ const RecipeList = () => {
   //get specific recipe information from server when recipe is pressed
   const imagePressed = async (id) => {
     try {
-      const response = await axios.get(`https://roughy-polite-wholly.ngrok-free.app/api/recipeInfo`, {
+      const response = await axios.get(`https://recipe-recon.onrender.com/api/recipeInfo`, {
         params: { query: id },
       });
       const recipeInfo = response.data;

@@ -41,7 +41,7 @@ const Home = () => {
         name: 'image.jpg',
       });
       const response = await axios.post(
-        `https://roughy-polite-wholly.ngrok-free.app/api/imageRecognition`,
+        `http://localhost:80/api/imageRecognition`,
         formData,
         {
           headers: {

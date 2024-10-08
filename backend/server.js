@@ -4,6 +4,9 @@ import dotenv from "dotenv";
 import axios from "axios";
 import multer from "multer";
 import FormData from "form-data";
+import * as tf from '@tensorflow/tfjs';
+import mobilenet from '@tensorflow-models/mobilenet';
+import sharp from "sharp";
 
 dotenv.config();
 
@@ -103,50 +106,52 @@ app.get("/api/recipeSearch/random", async (req, res) => {
     }
 });
 
-
+let model = null;
 const upload = multer({ storage: multer.memoryStorage() });
 
+const loadModel = async () => {
+    await tf.ready();
+    model = await mobilenet.load({
+        version: 2,
+        alpha: 1.0,
+    })
+}
+
+loadModel();
 app.post("/api/imageRecognition", upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
     }
 
+    if(!model){
+        return res.status(400).json({ error: "Model is not loaded"})
+    }
+
     try {
         console.log("Received file:", req.file.originalname);
 
-        // Create a new FormData instance
-        const formData = new FormData();
-        
-        // Append the file buffer directly to formData
-        formData.append('file', req.file.buffer, {
-            filename: req.file.originalname,
-            contentType: req.file.mimetype,
-        });
+        // Process the image buffer using sharp
+        const imageBuffer = await sharp(req.file.buffer)
+            .resize({ width: 224, height: 224 })
+            .toFormat('png')
+            .toBuffer();
 
-        // Send the file to Spoonacular API
-        const response = await axios.post(
-            'https://api.spoonacular.com/food/images/classify',
-            formData,
-            {
-                params: {
-                    apiKey: process.env.SPOONACULAR_API_KEY
-                },
-                headers: {
-                    ...formData.getHeaders()
-                },
-                maxContentLength: Infinity,
-                maxBodyLength: Infinity
-            }
-        );
+        // Decode the image buffer into a Tensor
+        const imageTensor = tf.node.decodeImage(imageBuffer, 3)
+            .expandDims(0)  // Add a batch dimension
+            .toFloat()
+            .div(tf.scalar(255)); // Normalize the image
 
-        console.log("Spoonacular API response:", response.data);
-        res.status(200).json(response.data);
+        // Run image classification using the MobileNet model
+        const predictions = await model.classify(imageTensor);
+
+        // Send the predictions as the response
+        console.log("Model predictions:", predictions);
+        res.status(200).json(predictions);
+
     } catch (error) {
-        console.error("Error fetching data from Spoonacular API:", error.message);
-        if (error.response) {
-            console.error("Spoonacular API error response:", error.response.data);
-        }
-        res.status(500).json({ error: "Failed to fetch data from Spoonacular API" });
+        console.error("Error classifying the image:", error.message);
+        res.status(500).json({ error: "Failed to classify image" });
     }
 });
 
