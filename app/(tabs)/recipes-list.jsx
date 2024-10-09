@@ -319,15 +319,6 @@ const RecipeList = () => {
                 source={{ html: selectedRecipe.summary }}
               />
               <TouchableOpacity
-                className="bg-blue-500 p-3 rounded-full mt-4"
-                onPress={closeModal}
-              >
-                <Text className="text-white font-bold text-center">
-                  Hide Modal
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
                 className="bg-title p-3 rounded-full mt-4"
                 onPress={toggleFavourite}
               >
@@ -338,6 +329,14 @@ const RecipeList = () => {
                 </Text>
               </TouchableOpacity>
               {selectedRecipe && <Instructions recipe={selectedRecipe} />}
+              <TouchableOpacity
+                className="bg-blue-500 p-3 rounded-full mt-4"
+                onPress={closeModal}
+              >
+                <Text className="text-white font-bold text-center">
+                  Hide Modal
+                </Text>
+              </TouchableOpacity>
             </View>
           </Modal>
         )}
