@@ -4,9 +4,7 @@ import dotenv from "dotenv";
 import axios from "axios";
 import multer from "multer";
 import FormData from "form-data";
-import * as tf from '@tensorflow/tfjs';
-import mobilenet from '@tensorflow-models/mobilenet';
-import sharp from "sharp";
+import vision from "@google-cloud/vision"
 
 dotenv.config();
 
@@ -106,54 +104,47 @@ app.get("/api/recipeSearch/random", async (req, res) => {
     }
 });
 
-let model = null;
+
 const upload = multer({ storage: multer.memoryStorage() });
 
-const loadModel = async () => {
-    await tf.ready();
-    model = await mobilenet.load({
-        version: 2,
-        alpha: 1.0,
-    })
-}
-
-loadModel();
 app.post("/api/imageRecognition", upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
     }
 
-    if(!model){
-        return res.status(400).json({ error: "Model is not loaded"})
-    }
-
     try {
         console.log("Received file:", req.file.originalname);
-
-        // Process the image buffer using sharp
-        const imageBuffer = await sharp(req.file.buffer)
-            .resize({ width: 224, height: 224 })
-            .toFormat('png')
-            .toBuffer();
-
-        // Decode the image buffer into a Tensor
-        const imageTensor = tf.node.decodeImage(imageBuffer, 3)
-            .expandDims(0)  // Add a batch dimension
-            .toFloat()
-            .div(tf.scalar(255)); // Normalize the image
-
-        // Run image classification using the MobileNet model
-        const predictions = await model.classify(imageTensor);
-
-        // Send the predictions as the response
-        console.log("Model predictions:", predictions);
-        res.status(200).json(predictions);
-
-    } catch (error) {
-        console.error("Error classifying the image:", error.message);
-        res.status(500).json({ error: "Failed to classify image" });
-    }
-});
+    
+        // Create a Google Vision client
+        const client = new vision.ImageAnnotatorClient({
+          keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+        });
+    
+        // Prepare the image data
+        const image = {
+          content: req.file.buffer.toString('base64'),
+        };
+        
+        //Feature to detect
+        const features = [{ type: 'LABEL_DETECTION' }]; 
+    
+        // Send the request to Google Vision
+        const [response] = await client.annotateImage({ image, features });
+    
+        console.log("Google Vision API response:", response);
+    
+        // Extract description and score
+        const data = response.labelAnnotations.map(item => ({
+            description: item.description,
+            score: item.score,
+        }));
+    
+        res.status(200).json({ data });
+      } catch (error) {
+        console.error("Error using Google Vision:", error.message);
+        res.status(500).json({ error: "Failed to process image with Google Vision" });
+      }
+    });
 
 
 app.use((err, req, res, next) => {

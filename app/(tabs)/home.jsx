@@ -26,11 +26,9 @@ const Home = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [response, setResponse] = useState('');
   const [saving, setSaving] = useState(false);
-
+  
   // Handler function to add the entered ingredient to the list
-
   const imageRecognition = async (imageUri) => {
     setLoading(true);
     try {
@@ -49,15 +47,47 @@ const Home = () => {
           },
         }
       );
-      setResponse(response.data);
-      setIngredient(response.data.category);
-      handleAddIngredient
+
+      const genericCategories = ['Food', 'Fruit', 'Whole food', 'Natural foods', 'Staple food', 'Vegetable', 'Ingredient','Recipe', 'Cuisine', 'Plant', 'Meat', 'Animal Product'
+      ];
+
+      // Filter the response to exclude generic categories
+      const filteredData = response.data.data.filter(item => !genericCategories.includes(item.description));
+
+      console.log(filteredData);
+      if (filteredData.length > 0) {
+        const options = filteredData.map(item => item.description);
+        const scores = filteredData.map(item => item.score)
+        showSelectionAlert(options,scores);
+      } else { 
+        setError('No specific ingredients found.');
+      }
     } catch (err) {
       console.error("Error fetching recognition response: ", err);
       setError('Failed to fetch recipes');
     } finally {
       setLoading(false);
     }
+  };
+
+  const showSelectionAlert = (options,scores) => {
+    Alert.alert(
+      'Image Recognition Results',
+      'Please choose the correct ingredient from the result' ,
+      [
+        ...options.map((option, index) => ({
+          text: `${option} - ${(scores[index]*100).toFixed(2)}%`,
+          onPress: () => {
+            setIngredient(option); 
+          },
+        })),
+        {
+          text: 'Try Again',
+          style: 'cancel'
+        },
+      ],
+      { cancelable: true }
+    );
   };
   
   const openCamera = async () => {
@@ -85,6 +115,30 @@ const Home = () => {
         "Error",
         "Something went wrong while trying to take and process the picture. Please try again."
       );
+    }
+  };
+  const openPhotos = async () => {
+    try {
+      let result = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (result.status !== "granted") {
+        Alert.alert(
+          "Permission denied",
+          "Sorry, we need permission to select picture!"
+        );
+        return;
+      }
+      let pickerResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+      if (!pickerResult.canceled) {
+        const imageUri = pickerResult.assets[0].uri;
+        await imageRecognition(imageUri);
+      }
+    } catch (error) {
+      Alert.alert(error.message);
     }
   };
 
@@ -132,7 +186,6 @@ const Home = () => {
 
   const handleClearInput = () => {
     setIngredient('');
-    setResponse('');
   };
 
   return (
@@ -149,7 +202,7 @@ const Home = () => {
           </View>
           <View>
             <TouchableOpacity
-              onPress={openCamera}
+              onPress={openPhotos}
               className="mb-2 mt-2 p-2 bg-secondary rounded-full"
             >
               <Ionicons name="camera" size={40} color="black" />
@@ -186,13 +239,7 @@ const Home = () => {
         
           <View className="w-[80%]">
             {loading && <Text className="text-secondary font-poppinsBold mt-3 mb-3 text-lg">Loading...Analysing image....</Text>}
-            {error && <Text className="text-red-500 mb-4">{error}</Text>}
-            {!loading && response && 
-              <>
-                <Text className="text-secondary font-poppinsRegular mt-3 mb-1">Item found with {(response.probability * 100).toFixed(2)}% probability.</Text>
-                <Text className="text-secondary font-poppinsRegular">If item is not correct, please try again!</Text>
-              </>
-            }
+            {error && <Text className="text-red-500 mb-4 font-poppinsBold">{error}</Text>}
           </View>
 
           {/* Display the added ingredients */}
