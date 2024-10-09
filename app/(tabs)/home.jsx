@@ -72,8 +72,8 @@ const Home = () => {
 
   const showSelectionAlert = (options,scores) => {
     Alert.alert(
-      'Image Recognition Results',
-      'Please choose the correct ingredient from the result' ,
+      'Image Results with Scores',
+      'Please choose the correct ingredient',
       [
         ...options.map((option, index) => ({
           text: `${option} - ${(scores[index]*100).toFixed(2)}%`,
@@ -238,7 +238,7 @@ const Home = () => {
           </View>
         
           <View className="w-[80%]">
-            {loading && <Text className="text-secondary font-poppinsBold mt-3 mb-3 text-lg">Loading...Analysing image....</Text>}
+            {loading && <Text className="text-secondary font-poppinsBold mt-3 mb-3 text-lg text-center">Loading... Analysing image...</Text>}
             {error && <Text className="text-red-500 mb-4 font-poppinsBold">{error}</Text>}
           </View>
 
