@@ -3,7 +3,7 @@
 ## Introduction
 In today's fast-paced world, we often find ourselves struggling to balance our love for food with our busy lifestyles. That's why we decided to develop a revolutionary solution: an image-base cooking wizard software designed specifically for inexperienced home cooks. 
 
-Recipe Recon is a mobile application that generates recipes based on the ingredients users have in their fridge or pantry. Using a camera to capture ingredient images, the app will provides users with recipe suggestions based on the ingredient they have. 
+Recipe Recon is a mobile application that generates recipes based on the ingredients users have in their fridge or pantry. Using a camera to capture ingredient images, the app will provide users with recipe suggestions based on the ingredient they have. 
 
 Simply scan the ingredients you have on hand, and our app will suggest mouth-watering recipes and provide step-by-step cooking guidance. Say goodbye to kitchen stress and hello to a world of flavours!
 
@@ -22,11 +22,20 @@ Simply scan the ingredients you have on hand, and our app will suggest mouth-wat
 - **Recipe Generation** - Based on the input ingredients, the app will generate a list of possible recipes. Users can view detail instructions for each recipe.
 - **Personalised Recipe Recommendation** - The app provides recipe recommendations every week to the user's previous favourite recipes and dietary preferences.
 - **Shopping List Integration** - App will generate a shopping list based on the ingredients needed for selected recipes. The list can be exported or shared for grocery shopping.
-- **Community** - Users can share their favorite recipes, rate and review other users’ recipes, and participate in a community forum for cooking tips and advice.
+- **Community** - Users can share their favourite recipes, rate and review other users’ recipes, and participate in a community forum for cooking tips and advice.
 
 ## Installation
+Clone the repository on your local
+```bash
+   git clone https://github.com/MinThiha22/recipe-recon.git
+```
+Install required dependencies.
+
+Install Expo Go on your mobile device or use IOS simulator.
 
 ## Usage
+To fully test application including Image Recognition and Recipe Generation functionalities please contact Product Owner Min Thiha Ko Ko (Mike) (minthihakoko@gmail.com) or Dan Thrope to get API key.
+
 
 ## Team
 ### Developers
