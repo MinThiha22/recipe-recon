@@ -23,6 +23,7 @@ const SignUp = () => {
   const submit = async () => {
     if(!form.username || !form.email || !form.password){
       Alert.alert('Error','Please fill in all the fields');
+      return
     }
     setIsSumbitting(true);
     try {
@@ -43,7 +44,7 @@ const SignUp = () => {
     <SafeAreaView className="bg-primary h-full">
       <ScrollView>
         <View className="w-full justify-center min-h-[80vh] px-4 my-6">
-          <Image source={images.whiteLogo} resizeMode='contain' className="w-[120px] h-[120px]" />
+          <Image source={images.whiteLogo} resizeMode='contain' className="w-[120px] h-[120px]" testID='mainLogo'/>
           <Text className="text-3xl text-title mt-5 font-chewy"> Sign Up to Recipe Recon</Text>
           <FormField 
             title = "Username"
@@ -75,7 +76,7 @@ const SignUp = () => {
           />
           <View className="justify-center flex-row gap-2">
             <Text className=" text-secondary font-poppinsBlack pt-5">Already have an account?</Text>
-            <Link href="/sign-in" className="text-title underline text-lg font-chewy pt-4">Sign In</Link>
+            <Link href="/sign-in" className="text-title underline text-lg font-chewy pt-4" testID='signInLink'>Sign In</Link>
           </View>
         </View>
       </ScrollView>
