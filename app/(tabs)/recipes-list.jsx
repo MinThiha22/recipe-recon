@@ -35,7 +35,7 @@ const RecipeList = () => {
     let sort = null;
     if (query.trim()) {
       //if search bar is not empty and sorting by ingredients and query, if not sort by query
-      endpoint = 'https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch';
+      endpoint = 'https://recipe-recon.onrender.com/api/recipeSearch';
 
       ingredients = currentIsSortByIngredients
       ? ingredientsList.join(',')

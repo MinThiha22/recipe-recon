@@ -39,7 +39,7 @@ const Home = () => {
         name: 'image.jpg',
       });
       const response = await axios.post(
-        `http://localhost:80/api/imageRecognition`,
+        `https://recipe-recon.onrender.com/api/imageRecognition`,
         formData,
         {
           headers: {
@@ -202,7 +202,7 @@ const Home = () => {
           </View>
           <View>
             <TouchableOpacity
-              onPress={openPhotos}
+              onPress={openCamera}
               className="mb-2 mt-2 p-2 bg-secondary rounded-full"
             >
               <Ionicons name="camera" size={40} color="black" />
