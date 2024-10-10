@@ -14,37 +14,6 @@ app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.get("/api/recipeSearch", async (req, res) => {
-//   const { query, ingredients, sort } = req.query;
-
-//   if (!query) {
-//     return res.status(400).json({ error: "Query parameter is required" });
-//   }
-//   try {
-//     const response = await axios.get(
-//       "https://api.spoonacular.com/recipes/complexSearch",
-//       {
-//         params: {
-//           query: query,
-//           number: 10,
-//           includeIngredients: ingredients,
-//           fillIngredients: true,
-//           sort: sort,
-//           apiKey: process.env.SPOONACULAR_API_KEY,
-//         },
-//       }
-//     );
-
-//     res.status(200).json(response.data);
-//   } catch (error) {
-//     console.error("Error fetching data from Spoonacular API:", error.message);
-//     res
-//       .status(500)
-//       .json({ error: "Failed to fetch data from Spoonacular API" });
-//   }
-// });
-
-// Test app.get("/api/recipeSearch", async (req, res)
 app.get("/api/recipeSearch", async (req, res) => {
   const { query, ingredients, sort, isVegan, isGlutenFree } = req.query;
 

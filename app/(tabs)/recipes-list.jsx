@@ -36,78 +36,7 @@ const RecipeList = () => {
     searchRecipes(isSortByIngredients, isVeganFilter, isGlutenFreeFilter);
   };
 
-  // // Get api recipes data from server (modified)
-  // const searchRecipes = async (
-  //   currentIsSortByIngredients,
-  //   currentIsVeganFilter,
-  //   currentIsGlutenFreeFilter
-  // ) => {
-  //   setRecipes([]);
-  //   setLoading(true);
-  //   setError("");
-
-  //   //refresh ingredients if sorting by ingredients
-  //   if (user && currentIsSortByIngredients) {
-  //     await fetchIngredients(user.uid);
-  //   }
-
-  //   let ingredients = ingredientsList.join(",");
-  //   let endpoint = null;
-  //   let param = {};
-  //   let sort = null;
-
-  //   if (query.trim()) {
-  //     // If search bar is not empty and sorting by ingredients and query, if not sort by query
-  //     endpoint = "https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch";
-
-  //     ingredients = currentIsSortByIngredients ? ingredientsList.join(",") : "";
-
-  //     sort = currentIsSortByIngredients
-  //       ? "min-missing-ingredients"
-  //       : "popularity";
-
-  //     param = { query, ingredients, sort };
-
-  //     // Apply filters
-  //     if (currentIsVeganFilter) {
-  //       param.isVegan = true;
-  //     }
-
-  //     if (currentIsGlutenFreeFilter) {
-  //       param.isGlutenFree = true;
-  //     }
-  //   } else {
-  //     // If search bar is empty
-  //     endpoint = currentIsSortByIngredients
-  //       ? "https://roughy-polite-wholly.ngrok-free.app/api/ingredientsSearch"
-  //       : "https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/random";
-
-  //     // If sorting by ingredients use ingredients parameter else use no paramters
-  //     param = currentIsSortByIngredients ? { ingredients } : {};
-
-  //     // Apply filters
-  //     if (currentIsVeganFilter) {
-  //       param.isVegan = true;
-  //     }
-
-  //     if (currentIsGlutenFreeFilter) {
-  //       param.isGlutenFree = true;
-  //     }
-  //   }
-
-  //   // Fetch data from server endpoint using parameters
-  //   try {
-  //     const response = await axios.get(endpoint, { params: param });
-  //     const recipeData =
-  //       response.data.recipes || response.data.results || response.data;
-  //     setRecipes(recipeData);
-  //   } catch (err) {
-  //     setError("Failed to fetch recipes");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-  // TEST - Updated searchRecipes function
+  // Get api recipes data from server (modified)
   const searchRecipes = async (
     currentIsSortByIngredients,
     currentIsVeganFilter,
