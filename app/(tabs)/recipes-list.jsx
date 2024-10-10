@@ -4,6 +4,7 @@ import axios from 'axios';
 import RenderHtml from 'react-native-render-html';
 import { db, auth } from '../../lib/firebase.js';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
+import FavouriteButton from '../../components/FavouriteButton.jsx';
 
 const RecipeList = () => {
   const [query, setQuery] = useState('');
@@ -12,7 +13,6 @@ const RecipeList = () => {
   const [error, setError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [favouriteList, setFavouriteList] = useState([]);
   const [recentList, setRecentList] = useState([]);
   const [user, setUser] = useState(null);
   const [isSortByIngredients, setIsSortByIngredients] = useState(false);
@@ -99,27 +99,16 @@ const RecipeList = () => {
     setSelectedRecipe(null);
   };
 
-  //get current user information and favourites on mount
+  //get current user information on mount
   useEffect(() => {
     const currentUser = auth.currentUser;
     setUser(currentUser);
 
     if (currentUser) {
-      fetchFavourites(currentUser.uid);
       fetchIngredients(currentUser.uid);
       fetchRecents(currentUser.uid);
     }
   }, []);
-
-  //get favourites from firebase
-  const fetchFavourites = async (userId) => {
-    const docRef = doc(db, 'favourites', userId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      setFavouriteList(docSnap.data().list);
-    }
-  };
 
   //get ingredients from firebase
   const fetchIngredients = async (userId) => {
@@ -131,43 +120,6 @@ const RecipeList = () => {
     }
     else {
       setIngredientsList([]);
-    }
-  };
-
-  //save favourites to firebase
-  const saveFavourites = async (updatedList) => {
-    if (user) {
-      const userFavouritesRef = doc(db, 'favourites', user.uid);
-      await setDoc(userFavouritesRef, { list: updatedList });
-    }
-  };
-
-  //add favourite to item list and firebase
-  const addFavourite = () => {
-    const newItem = { id: selectedRecipe.id, name: selectedRecipe };
-    const updatedList = [...favouriteList, newItem];
-    setFavouriteList(updatedList);
-    saveFavourites(updatedList);
-  };
-
-  //remove favourite from item list and firebase
-  const removeFavourite = () => {
-    const updatedList = favouriteList.filter((x) => x.id !== selectedRecipe.id);
-    setFavouriteList(updatedList);
-    saveFavourites(updatedList);
-  };
-
-  //check if item is favourited
-  const isFavourite = (recipeId) => {
-    return favouriteList.some((item) => item.id === recipeId);
-  };
-
-  //toggle favourite based on if it is favourited
-  const toggleFavourite = () => {
-    if (isFavourite(selectedRecipe.id)) {
-      removeFavourite();
-    } else {
-      addFavourite();
     }
   };
 
@@ -284,13 +236,7 @@ const RecipeList = () => {
               >
                 <Text className="text-white font-bold text-center">Hide Modal</Text>
               </TouchableOpacity>
-
-              <TouchableOpacity
-                className="bg-title p-3 rounded-full mt-4"
-                onPress={toggleFavourite}
-              >
-                <Text className="text-white font-bold text-center">{isFavourite(selectedRecipe.id) ? 'Unfavourite' : 'Favourite!'}</Text>
-              </TouchableOpacity>
+              <FavouriteButton selectedRecipe= {selectedRecipe}/>
             </View>
           </Modal>
         )}
