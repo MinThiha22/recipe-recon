@@ -10,7 +10,7 @@ const Comments = ({ postId }) => {
     const [name, setName] = useState('');
     const [profilePicture, setPicture] = useState(null);
 
-
+    //on mount get user data and comments
     useEffect(() => {
         const currentUser = auth.currentUser;
         setUser(currentUser);
@@ -20,6 +20,7 @@ const Comments = ({ postId }) => {
         fetchComments();
     }, []);
 
+    //load user data
     const getData = async (currentUser) => {
         const { username } = await getCurrentUserData();
         setName(username);
@@ -27,6 +28,7 @@ const Comments = ({ postId }) => {
         setPicture(profilePicture);
     };
 
+    //get comments from firebase
     const fetchComments = async () => {
         const docRef = doc(db, 'posts', postId);
         const docSnap = await getDoc(docRef);
@@ -39,12 +41,14 @@ const Comments = ({ postId }) => {
         }
     };
 
+    //save comments to firebase
     const saveComments = async (updatedList) => {
         const postRef = doc(db, 'posts', postId);
         await updateDoc(postRef, { comments: updatedList });
         fetchComments();
     };
 
+    //add comment to comment list
     const addComment = () => {
         if (comment) {
             const newItem = { comment, username: name, picture: profilePicture };
@@ -55,6 +59,7 @@ const Comments = ({ postId }) => {
         }
     };
 
+    //render comments
     const displayComments = ({ item }) => (
         <View className="m-2 p-4 bg-white rounded-lg shadow">
             <Text className="text-gray-600">{item.comment}</Text>

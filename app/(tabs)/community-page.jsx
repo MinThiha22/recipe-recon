@@ -11,6 +11,7 @@ const CommunityPage = () => {
     const [posts, setPosts] = useState([]);
     const [commentsVisible, setCommentsVisible] = useState(null);
 
+    //on launch get posts 
     useEffect(() => {
         const q = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
 
@@ -25,10 +26,12 @@ const CommunityPage = () => {
         return () => unsubscribe();
     }, []);
 
+    //toggle comments visibility
     const toggleCommentsVisibility = (postId) => {
         setCommentsVisible((prev) => prev === postId ? null : postId);
     };
 
+    //function to render posts
     const displayPosts = ({ item }) => (
         <View>
             <View className="m-2 p-4 bg-white rounded-lg shadow">
@@ -65,6 +68,7 @@ const CommunityPage = () => {
         </View >
     );
 
+    //function to display title
     const displayHeader = () => (
         <View className="w-full items-center">
             <Text className="text-3xl mt-5 text-title font-chewy">
