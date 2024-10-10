@@ -14,8 +14,21 @@ jest.mock('expo-router', () => ({
 }));
 
 // Mock firebase
-jest.mock('./lib/firebase', () => ({
-  createUser: jest.fn()
+jest.mock('./lib/firebase', () => ({  
+  createUser: jest.fn(),
+  auth: { currentUser: { uid: 'userId' } },
+  getCurrentUserData: jest.fn(() => Promise.resolve({ username: 'user' })),
+  getProfilePicture: jest.fn(() => Promise.resolve('profilePictureUrl')),
+}));
+
+// Mock Firestore functions
+jest.mock('firebase/firestore', () => ({
+  updateDoc: jest.fn(),
+  doc: jest.fn(),
+  getDoc: jest.fn(() => Promise.resolve({
+    exists: () => true,
+    data: () => ({ comments: [{ comment: 'Great post!', username: 'user1', picture: 'url1' }] }),
+  })),
 }));
 
 // Mock the StatusBar
