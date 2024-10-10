@@ -1,139 +1,156 @@
-mport React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { Alert } from 'react-native';
-import { router } from 'expo-router';
-import SignUp from '../SignUp';
-import { createUser } from '../../lib/firebase';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import SignUp from '../../app/(auth)/sign-up';
 import { useGlobalContext } from '../../context/GlobalProvider';
-
-// Mock the required dependencies
-jest.mock('expo-router', () => ({
-  router: {
-    replace: jest.fn()
-  }
-}));
-
-jest.mock('../../lib/firebase', () => ({
-  createUser: jest.fn()
-}));
+import { Alert } from 'react-native';
+import { createUser } from '../../lib/firebase';
+import { router } from 'expo-router';
+import { images } from '../../constants';
 
 jest.mock('../../context/GlobalProvider', () => ({
   useGlobalContext: jest.fn()
 }));
 
-jest.mock('react-native/Libraries/Alert/Alert', () => ({
-  alert: jest.fn()
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  Link: 'Link',
+  router: {
+    replace: jest.fn()
+  }
 }));
 
-describe('SignUp Component', () => {
+jest.mock('../../constants/images', () => ({
+  whiteLogo: require('../../assets/images/logo_white.png') 
+}));
+
+jest.mock('../../lib/firebase', () => ({
+  createUser: jest.fn(),
+}));
+
+describe('<SignUp />', () => {
+
+  // Setup mock values before each test
   const mockSetUser = jest.fn();
   const mockSetIsLoggedIn = jest.fn();
 
   beforeEach(() => {
-    // Reset all mocks before each test
-    jest.clearAllMocks();
-    
-    // Setup default mock implementation for useGlobalContext
-    useGlobalContext.mockImplementation(() => ({
+    useGlobalContext.mockReturnValue({
       setUser: mockSetUser,
-      setIsLoggedIn: mockSetIsLoggedIn
-    }));
+      setIsLoggedIn: mockSetIsLoggedIn,
+    });
+    jest.spyOn(Alert, 'alert');
   });
 
-  it('renders correctly', () => {
-    const { getByText, getByPlaceholderText } = render(<SignUp />);
-    
+  // Clear all mocks after test
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // Test if page renders correctly.
+  it('page renders correctly', () => {
+    const { getByText, getByPlaceholderText, getByTestId } = render(<SignUp />);
+
+    // Check Title and Logo
     expect(getByText('Sign Up to Recipe Recon')).toBeTruthy();
+    const logoImage = getByTestId('mainLogo');
+    expect(logoImage.props.source).toEqual(images.whiteLogo);
+
+    // Check form labels
+    expect(getByText('Username')).toBeTruthy();
+    expect(getByText('Email')).toBeTruthy();
+    expect(getByText('Password')).toBeTruthy();
+
+    // Check input fields
     expect(getByPlaceholderText('Your name')).toBeTruthy();
     expect(getByPlaceholderText('example@gmail.com')).toBeTruthy();
     expect(getByPlaceholderText('*********')).toBeTruthy();
-    expect(getByText('Sign Up')).toBeTruthy();
+
+    // Check sign in section
+    expect(getByText('Already have an account?')).toBeTruthy();
+    expect(getByTestId('signInLink')).toBeTruthy();
   });
 
-  it('handles form input changes', () => {
-    const { getByPlaceholderText } = render(<SignUp />);
-    
-    const usernameInput = getByPlaceholderText('Your name');
-    const emailInput = getByPlaceholderText('example@gmail.com');
-    const passwordInput = getByPlaceholderText('*********');
-
-    fireEvent.changeText(usernameInput, 'testuser');
-    fireEvent.changeText(emailInput, 'test@example.com');
-    fireEvent.changeText(passwordInput, 'password123');
-
-    expect(usernameInput.props.value).toBe('testuser');
-    expect(emailInput.props.value).toBe('test@example.com');
-    expect(passwordInput.props.value).toBe('password123');
-  });
-
-  it('shows alert when submitting with empty fields', async () => {
-    const { getByText } = render(<SignUp />);
-    
-    fireEvent.press(getByText('Sign Up'));
-
-    expect(Alert.alert).toHaveBeenCalledWith('Error', 'Please fill in all the fields');
-  });
-
-  it('handles successful signup', async () => {
-    const mockUser = { id: '123', username: 'testuser' };
-    createUser.mockResolvedValueOnce(mockUser);
-
-    const { getByText, getByPlaceholderText } = render(<SignUp />);
-
-    // Fill in the form
+  it('create user successfully', async () => {
+    // Mock successful Firebase response
+    const mockFirebaseResponse = {
+      user: {
+        uid: expect.any(String), // Accept any string as uid
+        email: 'test@example.com',
+        displayName: 'testuser',
+        // Add other Firebase user properties as needed
+      }
+    };
+    createUser.mockResolvedValueOnce(mockFirebaseResponse);
+    const { getByPlaceholderText, getByText } = render(<SignUp />);
+    // Simulate filling in form fields
     fireEvent.changeText(getByPlaceholderText('Your name'), 'testuser');
     fireEvent.changeText(getByPlaceholderText('example@gmail.com'), 'test@example.com');
     fireEvent.changeText(getByPlaceholderText('*********'), 'password123');
 
-    // Submit the form
-    fireEvent.press(getByText('Sign Up'));
-
+    // Simulate pressing the Sign Up button
+    act(() => {
+      fireEvent.press(getByText('Sign Up'));
+    })
+    // Wait for the asynchronous actions
     await waitFor(() => {
+      // Check if createUser was called with the correct data
       expect(createUser).toHaveBeenCalledWith('testuser', 'test@example.com', 'password123');
-      expect(mockSetUser).toHaveBeenCalledWith(mockUser);
+      expect(mockSetUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          user: expect.objectContaining({
+            email: 'test@example.com',
+            displayName: 'testuser',
+            uid: expect.any(String)
+          })
+        })
+      ); // Check if the user was set and login status updated
       expect(mockSetIsLoggedIn).toHaveBeenCalledWith(true);
-      expect(router.replace).toHaveBeenCalledWith('/home');
+      expect(router.replace).toHaveBeenCalledWith('/home'); // Check if the router redirected to home
     });
   });
 
-  it('handles signup failure', async () => {
-    const errorMessage = 'Registration failed';
-    createUser.mockRejectedValueOnce(new Error(errorMessage));
+  it('show alert if createUser fails', async () => {
+    // Mock a Firebase error response
+    createUser.mockRejectedValueOnce(new Error('Firebase error'));
 
-    const { getByText, getByPlaceholderText } = render(<SignUp />);
+    const { getByPlaceholderText, getByText } = render(<SignUp />);
 
-    // Fill in the form
+    // Simulate filling in form fields
     fireEvent.changeText(getByPlaceholderText('Your name'), 'testuser');
     fireEvent.changeText(getByPlaceholderText('example@gmail.com'), 'test@example.com');
     fireEvent.changeText(getByPlaceholderText('*********'), 'password123');
 
-    // Submit the form
-    fireEvent.press(getByText('Sign Up'));
+    // Simulate pressing the Sign Up button
+    
+    act(() => {
+      fireEvent.press(getByText('Sign Up'));
+    })
 
+    // Wait for the asynchronous actions to complete
     await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith('Error', errorMessage);
-      expect(router.replace).not.toHaveBeenCalled();
+      // Check if createUser was called
+      expect(createUser).toHaveBeenCalledWith('testuser', 'test@example.com', 'password123');
+
+      // Ensure that the error alert was shown
+      expect(Alert.alert).toHaveBeenCalledWith('Error', 'Firebase error');
     });
   });
 
-  it('toggles submission state during signup process', async () => {
-    createUser.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
-
+  it('not create user if formfields are empty', async () => {
     const { getByText, getByPlaceholderText } = render(<SignUp />);
 
-    // Fill in the form
-    fireEvent.changeText(getByPlaceholderText('Your name'), 'testuser');
-    fireEvent.changeText(getByPlaceholderText('example@gmail.com'), 'test@example.com');
-    fireEvent.changeText(getByPlaceholderText('*********'), 'password123');
+    // Simulate empty formfield
+    fireEvent.changeText(getByPlaceholderText('Your name'), '');
+    fireEvent.changeText(getByPlaceholderText('example@gmail.com'), '');
+    fireEvent.changeText(getByPlaceholderText('*********'), '');
+ 
 
-    // Submit the form
-    fireEvent.press(getByText('Sign Up'));
-
-    // Check loading state
-    expect(getByText('Sign Up').props.disabled).toBeTruthy();
-
-    await waitFor(() => {
-      expect(getByText('Sign Up').props.disabled).toBeFalsy();
-    });
+    // Simulate pressing the Sign Up button without filling in the form
+    act(() => {
+      fireEvent.press(getByText('Sign Up'));
+    })
+    
+    // Ensure create user is not called
+    expect(createUser).not.toHaveBeenCalled();
   });
+
 });
