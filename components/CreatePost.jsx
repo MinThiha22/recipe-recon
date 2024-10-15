@@ -4,8 +4,9 @@ import { db, auth, getCurrentUserData, getProfilePicture, uploadPicture } from '
 import { doc, setDoc } from 'firebase/firestore';
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
+import { images } from "../constants";
 
-
+//Create post class for handling creat post display and logic
 const CreatePost = ({ onClose }) => {
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
@@ -16,7 +17,7 @@ const CreatePost = ({ onClose }) => {
     const [imageUrl, setImageUrl] = useState('');
     const [loading, setLoading] = useState(false);
 
-
+    //post function to save post to firebase
     const post = async () => {
         await getData(user);
         if (title && body) {
@@ -46,6 +47,7 @@ const CreatePost = ({ onClose }) => {
         }
     };
 
+    //load user on launch
     useEffect(() => {
         const currentUser = auth.currentUser;
         setUser(currentUser);
@@ -54,13 +56,15 @@ const CreatePost = ({ onClose }) => {
         }
     }, []);
 
+    //function to load user data from firebase
     const getData = async (currentUser) => {
         const { username } = await getCurrentUserData();
         setName(username);
         const profilePicture = await getProfilePicture(currentUser.uid);
-        setPicture(profilePicture);
+        setPicture(profilePicture || images.profilePlaceHolder);
     };
 
+    //function pick image for post
     const pickImage = async () => {
         Alert.alert(
             "Select Image Source",
@@ -81,7 +85,7 @@ const CreatePost = ({ onClose }) => {
         );
     };
 
-    // open camera to take profile picture
+    // open camera to take post picture
     const openCamera = async () => {
         try {
             let result = await ImagePicker.requestCameraPermissionsAsync();
@@ -154,6 +158,7 @@ const CreatePost = ({ onClose }) => {
         }
     };
 
+    //function for handling modal closing
     const onCloseModal = () => {
         setTitle('');
         setBody('');

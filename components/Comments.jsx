@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Text, TouchableOpacity, TextInput, View, Image, FlatList } from "react-native";
 import { db, auth, getCurrentUserData, getProfilePicture, uploadPicture } from '../lib/firebase.js';
 import { updateDoc, doc, getDoc } from 'firebase/firestore';
+import { images } from "../constants";
 
 const Comments = ({ postId }) => {
     const [comment, setComment] = useState('');
@@ -25,7 +26,7 @@ const Comments = ({ postId }) => {
         const { username } = await getCurrentUserData();
         setName(username);
         const profilePicture = await getProfilePicture(currentUser.uid);
-        setPicture(profilePicture);
+        setPicture(profilePicture || images.profilePlaceHolder);
     };
 
     //get comments from firebase
