@@ -10,18 +10,15 @@ import {
   SafeAreaView,
 } from "react-native";
 import axios from "axios";
-import RenderHtml from "react-native-render-html";
 import { db, auth } from "../../lib/firebase.js";
 import { doc, setDoc, getDoc,getRecents } from "firebase/firestore";
 import FilterButton from "../../components/FilterButton.jsx";
-import FavouriteButton from '../../components/FavouriteButton.jsx';
+import RecipeInfo from '../../components/RecipeInfo.jsx';
 
 const RecipeList = () => {
   const [query, setQuery] = useState("");
-  const [query, setQuery] = useState("");
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [error, setError] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
@@ -63,7 +60,6 @@ const RecipeList = () => {
     }
 
     let ingredients = ingredientsList.join(",");
-    let ingredients = ingredientsList.join(",");
     let endpoint = null;
     let param = {};
     let sort = null;
@@ -90,8 +86,6 @@ const RecipeList = () => {
       endpoint = currentIsSortByIngredients
         ? "https://recipe-recon.onrender.com/api/ingredientsSearch"
         : "https://recipe-recon.onrender.com/api/recipeSearch/random";
-        ? 'https://recipe-recon.onrender.com/api/ingredientsSearch'
-        : 'https://recipe-recon.onrender.com/api/recipeSearch/random';
 
 
       // If sorting by ingredients use ingredients parameter else use no paramters
@@ -115,8 +109,6 @@ const RecipeList = () => {
     // Fetch data from server endpoint using parameters
     try {
       const response = await axios.get(endpoint, { params: param });
-      const recipeData =
-        response.data.recipes || response.data.results || response.data;
       const recipeData =
         response.data.recipes || response.data.results || response.data;
       setRecipes(recipeData);
@@ -144,20 +136,13 @@ const RecipeList = () => {
   ]);
 
   // Get specific recipe information from server when recipe is pressed
-  const imagePressed = async (id) => {
+  const recipeSelected = async (id) => {
     try {
-      const response = await axios.get(
-        `https://recipe-recon.onrender.com/api/recipeInfo`,
-        {
-          params: { query: id },
-        }
-      );
 
       const response = await axios.get(`https://recipe-recon.onrender.com/api/recipeInfo`, {
         params: { query: id },
       });
       const recipeInfo = response.data;
-      console.log(recipeInfo);
       setSelectedRecipe(recipeInfo);
       setModalVisible(true);
       addRecents(recipeInfo);
@@ -189,20 +174,17 @@ const RecipeList = () => {
   //get ingredients from firebase
   const fetchIngredients = async (userId) => {
     const docRef = doc(db, "ingredients", userId);
-    const docRef = doc(db, "ingredients", userId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
       setIngredientsList(docSnap.data().list);
-    } else {
-    } else {
+    }  else {
       setIngredientsList([]);
     }
   };
 
   //toggle ingredient sort and update the search
   const toggleIngredientsSort = () => {
-    setIsSortByIngredients((prevIsSortByIngredients) => {
     setIsSortByIngredients((prevIsSortByIngredients) => {
       const newIsIngredients = !prevIsSortByIngredients;
       searchRecipes(newIsIngredients, isVeganFilter, isGlutenFreeFilter);
@@ -220,7 +202,6 @@ const RecipeList = () => {
   // Save recents to Firebase
   const saveRecents = async (updatedList) => {
     if (user) {
-      const userRecentsRef = doc(db, "recents", user.uid);
       const userRecentsRef = doc(db, "recents", user.uid);
       await setDoc(userRecentsRef, { list: updatedList });
     }
@@ -320,11 +301,7 @@ const RecipeList = () => {
             <View className="mb-4 bg-primary">
               <TouchableOpacity
                 className="flex-1 items-center justify-center"
-                onPress={() => imagePressed(item.id)}
-              >
-              <TouchableOpacity
-                className="flex-1 items-center justify-center"
-                onPress={() => imagePressed(item.id)}
+                onPress={() => recipeSelected(item.id)}
               >
                 <Image className="w-60 h-60" source={{ uri: item.image }} />
                 <Text className="text-2xl font-chewy text-center text-title">
@@ -411,7 +388,6 @@ const RecipeList = () => {
           </Modal>
         )}
       </View>
-    </SafeAreaView>
     </SafeAreaView>
   );
 };

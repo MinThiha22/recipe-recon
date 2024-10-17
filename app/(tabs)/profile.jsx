@@ -24,6 +24,8 @@ import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
 import { images, icons } from "../../constants";
 import FormField from "../../components/FormField";
+import RecipeInfo from '../../components/RecipeInfo.jsx';
+import axios from "axios";
 
 const Profile = () => {
   const [isSumbitting, setIsSumbitting] = useState(false);
@@ -44,6 +46,8 @@ const Profile = () => {
   const [ingredients, setIngredients] = useState([]);
   const [favourites, setFavourites] = useState([]);
   const [recents, setRecents] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
 
   // Log out current user when log out button is pressed
   const logOut = async () => {
@@ -311,6 +315,29 @@ const Profile = () => {
     setRecents(userData.recents);
   }
 
+  // Get specific recipe information from server when recipe is pressed
+  const recipeSelected = async (id) => {
+    try {
+      const response = await axios.get(`https://recipe-recon.onrender.com/api/recipeInfo`, {
+        params: { query: id },
+      });
+      const recipeInfo = response.data;
+      setSelectedRecipe(recipeInfo);
+      setModalVisible(true);
+      } catch (error) {
+        console.log(error.message);
+      } finally {
+      setLoading(false);
+    }
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedRecipe(null);
+  };
+
+
   return (
     <SafeAreaView className="h-full bg-primary">
       <ScrollView>
@@ -480,7 +507,7 @@ const Profile = () => {
                             </TouchableOpacity>
                            ) : (
                             <TouchableOpacity
-                              onPress=""
+                              onPress={() => recipeSelected(item.id)}
                               className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
                             >
                               <Text className="text-black font-poppingsBold">
@@ -538,7 +565,7 @@ const Profile = () => {
                             </TouchableOpacity>
                            ) : (
                             <TouchableOpacity
-                              onPress=""
+                              onPress= {() => recipeSelected(item.id)}
                               className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
                             >
                               <Text className="text-black font-poppingsBold">
@@ -607,6 +634,9 @@ const Profile = () => {
           
         </View>
       </ScrollView>
+      {selectedRecipe && ( 
+          <RecipeInfo selectedRecipe={selectedRecipe} visible={modalVisible} close={closeModal}></RecipeInfo>
+        )}
       <StatusBar backgroundColor="#161622" style="light"></StatusBar>
     </SafeAreaView>
   );
