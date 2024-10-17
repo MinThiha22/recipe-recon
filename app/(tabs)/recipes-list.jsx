@@ -15,6 +15,7 @@ import { db, auth } from "../../lib/firebase.js";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import FilterButton from "../../components/FilterButton.jsx";
 import FavouriteButton from '../../components/FavouriteButton.jsx';
+import RecipeInfo from '../../components/RecipeInfo.jsx';
 
 const RecipeList = () => {
   const [query, setQuery] = useState("");
@@ -334,37 +335,8 @@ const RecipeList = () => {
             </View>
           )}
         />
-
-        {selectedRecipe && (
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={closeModal}
-          >
-            <View className="flex-1 justify-center items-center m-5 bg-secondary p-5 rounded-lg">
-              <Image
-                className="w-48 h-48"
-                source={{ uri: selectedRecipe.image }}
-              />
-              <Text className="text-3xl font-chewy text-center text-title">
-                {selectedRecipe.title}
-              </Text>
-              <RenderHtml
-                contentWidth={400}
-                source={{ html: selectedRecipe.summary }}
-              />
-              <TouchableOpacity
-                className="bg-blue-500 p-3 rounded-full mt-4"
-                onPress={closeModal}
-              >
-                <Text className="text-white font-bold text-center">
-                  Hide Modal
-                </Text>
-              </TouchableOpacity>
-              <FavouriteButton selectedRecipe={selectedRecipe} />
-            </View>
-          </Modal>
+        {selectedRecipe && ( 
+          <RecipeInfo selectedRecipe={selectedRecipe} visible={modalVisible} close={closeModal}></RecipeInfo>
         )}
       </View>
     </SafeAreaView>
