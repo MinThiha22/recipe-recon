@@ -25,6 +25,7 @@ import * as ImagePicker from "expo-image-picker";
 import { images, icons } from "../../constants";
 import FormField from "../../components/FormField";
 import RecipeInfo from '../../components/RecipeInfo.jsx';
+import axios from "axios";
 
 const Profile = () => {
   const [isSumbitting, setIsSumbitting] = useState(false);
@@ -312,16 +313,15 @@ const Profile = () => {
   // Get specific recipe information from server when recipe is pressed
   const recipeSelected = async (id) => {
     try {
-
       const response = await axios.get(`https://recipe-recon.onrender.com/api/recipeInfo`, {
         params: { query: id },
       });
       const recipeInfo = response.data;
       setSelectedRecipe(recipeInfo);
       setModalVisible(true);
-      } catch (err) {
-      setError("Failed to fetch recipes");
-    } finally {
+      } catch (error) {
+        console.log(error.message);
+      } finally {
       setLoading(false);
     }
   };
