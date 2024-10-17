@@ -31,7 +31,7 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState('');
-  const [response, setResponse] = useState("");
+
   const [saving, setSaving] = useState(false);
   
   // Handler function to add the entered ingredient to the list
@@ -69,8 +69,6 @@ const Home = () => {
         setError('No specific ingredients found.');
       }
 
-      setResponse(response.data);
-      setIngredient(response.data.category);
       handleAddIngredient;
 
     } catch (err) {
@@ -160,7 +158,6 @@ const Home = () => {
     if (ingredient.trim()) {
       setIngredientsList([...ingredientsList, ingredient]);
       setIngredient("");
-      setResponse("");
     }
   };
 
@@ -201,9 +198,6 @@ const Home = () => {
   const handleClearInput = () => {
 
     setIngredient('');
-
-
-    setResponse("");
   };
 
   return (
