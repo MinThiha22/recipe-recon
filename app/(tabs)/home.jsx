@@ -91,6 +91,7 @@ const Home = () => {
     }
   };
 
+  // Handler function to add an ingredient to the list
   const handleAddIngredient = () => {
     if (ingredient.trim()) {
       setIngredientsList([...ingredientsList, ingredient]);
@@ -171,7 +172,11 @@ const Home = () => {
               handleChangeText={setIngredient}
               otherStyles="mb-2 w-[90%]"
             >
-              <TouchableOpacity onPress={handleClearInput}>
+              <TouchableOpacity
+                onPress={handleClearInput}
+                testID="clearInputButton"
+                accessibilityLabel="Clear input"
+              >
                 <Image
                   source={icons.close}
                   className="w-5 h-5"
@@ -224,6 +229,8 @@ const Home = () => {
                   <Text className="text-lg">{ingredient}</Text>
                   <TouchableOpacity
                     onPress={() => handleRemoveIngredient(index)}
+                    testID={`removeButton-${index}`}
+                    accessibilityLabel={`Remove ${ingredient}`}
                   >
                     <Image
                       source={icons.close}
@@ -242,6 +249,7 @@ const Home = () => {
       <View className="flex-row justify-between bg-primary p-4 absolute bottom-0 w-full">
         <TouchableOpacity
           onPress={handleClearAll}
+          accessibilityLabel="Clear All"
           className="w-[50%] justify-center items-center"
         >
           <Text className="text-white text-lg">Clear All</Text>
