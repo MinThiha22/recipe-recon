@@ -1,5 +1,5 @@
 import { Alert, View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import CustomButton from "../../components/CustomButton";
@@ -7,6 +7,7 @@ import { useGlobalContext } from "../../context/GlobalProvider";
 import { useFocusEffect } from '@react-navigation/native';
 import {
   logout,
+  updateUsername,
   getCurrentUserData,
   uploadProfilePicture,
   getProfilePicture,
@@ -15,24 +16,34 @@ import {
   deleteIngredient,
   deleteAllIngredients,
   getFavourites,
+  deleteFavourite,
   getRecents,
+  deleteRecent,
 } from "../../lib/firebase";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
 import { images, icons } from "../../constants";
+import FormField from "../../components/FormField";
 
 const Profile = () => {
   const [isSumbitting, setIsSumbitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const { setUser, setIsLoggedIn } = useGlobalContext();
+  const [newUsername, setNewUsername] = useState("");
   const [userData, setUserData] = useState({
     username: "",
     email: "",
     profilePicture: null,
     savedIngredients: [],
     favourites: [],
+    recents: [],
   });
   const [isLoading, setLoading] = useState(false);
+  const [isLoadingInfo, setLoadingInfo] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [ingredients, setIngredients] = useState([]);
+  const [favourites, setFavourites] = useState([]);
+  const [recents, setRecents] = useState([]);
 
   // Log out current user when log out button is pressed
   const logOut = async () => {
@@ -49,9 +60,10 @@ const Profile = () => {
     }
   };
 
-  // Get current user data including username, email, profilePicture, saveIngredients and favourites
+  // Get current user data including username, email, profilePicture.
   const getData = async () => {
-    setLoading(true);
+    if (isEditing) return;
+    setLoadingInfo(true);
     try {
       const user = await checkAuthState();
       if (!user) {
@@ -60,11 +72,36 @@ const Profile = () => {
       const userId = user.uid;
       const { username, email } = await getCurrentUserData();
       const profilePicture = await getProfilePicture(userId);
+      setUserData({ username, email, profilePicture });
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setLoadingInfo(false);
+    }
+  };
+
+  // Get Dynamic Data savedIngredients favourites, and recents recipes
+  const getDynamicData = async () => {
+    if (isEditing) return; 
+    setLoading(true);
+    try {
+      const user = await checkAuthState();
+      if (!user) {
+        throw new Error("User is not authenticated");
+      }
+      const userId = user.uid;
 
       const savedIngredients = await getIngredients(userId).catch(() => []);
       const favourites = await getFavourites(userId).catch(() => []);
       const recents = await getRecents(userId).catch(() => []);
-      setUserData({ username, email, profilePicture, savedIngredients, favourites, recents });
+      
+      setUserData(prevData => ({
+        ...prevData, 
+        savedIngredients, 
+        favourites, 
+        recents
+      }));
+
     } catch (error) {
       console.log(error.message);
     } finally {
@@ -74,13 +111,21 @@ const Profile = () => {
 
   useFocusEffect(
     useCallback(() => {
-      getData();
+      getDynamicData();
+      return () => {setIsEditing(false)}; 
     }, [])
   );
 
   useEffect(() => {
     getData();
   }, []);
+
+  useEffect(() => {
+    setIngredients(userData.savedIngredients);
+    setFavourites(userData.favourites);
+    setRecents(userData.recents);
+  }, [userData]);
+
 
   // Alert box to choose picture input
   const pickImage = async () => {
@@ -187,31 +232,20 @@ const Profile = () => {
     }
   };
 
-  // delete one ingredient from saved ingredients
-  const deleteOne = async (ingredient) => {
-    setIsSumbitting(true);
-    try {
-      const user = await checkAuthState();
-      if (!user) {
-        throw new Error("User is not authenticated");
-      }
-      const userId = user.uid;
-      await deleteIngredient(ingredient, userId);
-      setUserData((prevData) => ({
-        ...prevData,
-        savedIngredients: prevData.savedIngredients.filter(
-          (item) => item !== ingredient
-        ),
-      }));
-    } catch (error) {
-      Alert.alert("Error", error.message);
-    } finally {
-      setIsSumbitting(false);
-    }
+  const tempDeleteItem = (item, array, setState) => {
+    setState((prevArray) => prevArray.filter((arrayItem) => arrayItem !== item));
   };
 
-  // delete all ingredients
-  const deleteAll = async () => {
+  const tempDeleteAll = () => {
+    setIngredients([]);
+  };
+
+  const editProfile = async () => {
+    if(isLoading) return
+    setIsEditing(true);
+  }
+
+  const saveChanges = async () => {
     setIsSumbitting(true);
     try {
       const user = await checkAuthState();
@@ -219,15 +253,58 @@ const Profile = () => {
         throw new Error("User is not authenticated");
       }
       const userId = user.uid;
-      await deleteAllIngredients(userId);
-      setUserData((prevData) => ({ ...prevData, savedIngredients: [] }));
-      Alert.alert("Success", "All ingredients deleted successfully!");
+
+      await updateUsername(newUsername);
+
+      if(ingredients.length===0){
+        await deleteAllIngredients(userId);
+      } else {
+        const ingredientsToDelete = userData.savedIngredients.filter(
+          ingredient => !ingredients.includes(ingredient)
+        );
+
+        for (const ingredient of ingredientsToDelete) {
+          await deleteIngredient(ingredient, userId);
+        }
+      }
+
+      const favouritesToDelete = userData.favourites.filter(
+        fav => !favourites.includes(fav)
+      );
+      for (const fav of favouritesToDelete) {
+        await deleteFavourite(fav, userId);
+      }
+
+      const recentsToDelete = userData.recents.filter(
+        recent => !recents.includes(recent)
+      );
+      for (const recent of recentsToDelete) {
+        await deleteRecent(recent, userId);
+      }
+
+      setUserData(prevData => ({
+        ...prevData,
+        username: newUsername,
+        savedIngredients: ingredients,
+        favourites: favourites,
+        recent: recents
+      }));
+
+      Alert.alert("Success", "Changes saved successfully!");
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
       setIsSumbitting(false);
+      setIsEditing(false);
     }
-  };
+  }
+
+  const cancelChanges = async () => {
+    setIsEditing(false);
+    setIngredients(userData.savedIngredients);
+    setFavourites(userData.favourites);
+    setRecents(userData.recents);
+  }
 
   return (
     <SafeAreaView className="h-full bg-primary">
@@ -236,15 +313,24 @@ const Profile = () => {
           <Text className="text-3xl mt-5 text-title font-chewy">
             Your Profile
           </Text>
-          {isLoading && (
+          {isLoadingInfo && (
             <Text className="text-lg mt-3 text-secondary font-poppinsBold">
               Loading...Please wait...
             </Text>
           )}
-          {!isLoading && (
+          {!isLoadingInfo && !isEditing && (
             <Text className="text-lg mt-3 text-secondary font-poppinsBold">
               Hello {userData.username}
             </Text>
+          )}
+          {isEditing && (
+            <FormField 
+              title = ""
+              value = {newUsername}
+              placeholder={userData.username}
+              handleChangeText = {(text)=>{setNewUsername(text)}}
+              otherStyles = "w-[30%]"
+            />
           )}
 
           <View className="relative mt-3">
@@ -284,6 +370,7 @@ const Profile = () => {
             <Text className="text-lg font-poppinsBold text-secondary">
               Saved ingredients
             </Text>
+            
             {isLoading && (
               <Text className=" text-secondary font-poppingsRegular">
                 Loading...Please wait...
@@ -292,34 +379,55 @@ const Profile = () => {
             {!isLoading && (
               <>
                 <View className="pt-2">
-                  {userData.savedIngredients &&
-                    userData.savedIngredients.length > 0 ? (
-                    userData.savedIngredients.map((item, index) => (
-                      <View
-                        key={index}
-                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
-                      >
-                        <Text className="font-poppingsRegular font-bold text-secondary">
-                          {item}
-                        </Text>
-                        <TouchableOpacity onPress={() => deleteOne(item)}>
-                          <Image source={icons.close} className="w-4 h-4" />
-                        </TouchableOpacity>
-                      </View>
+                  {ingredients &&
+                    ingredients.length > 0 ? (
+                    ingredients.map((item, index) => (
+                      isEditing ? (
+                        <View key={index} className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto">
+                          <Text className="font-poppingsRegular font-bold text-secondary">
+                            {item}
+                          </Text>
+                          <TouchableOpacity onPress={() => tempDeleteItem(item,ingredients,setIngredients)}>
+                            <Image source={icons.close} className="w-4 h-4" />
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <View key={index} className="flex-row justify-between items-center p-2 mb-1 rounded-md w-[70%]">
+                          <Text className="font-poppingsBold text-lg font-bold text-secondary">
+                            {item}
+                          </Text>
+                        </View>
+                      )
                     ))
                   ) : (
                     <Text className="font-poppingsRegular text-secondary">
                       No saved ingredients
                     </Text>
                   )}
-                  {userData.savedIngredients &&
-                    userData.savedIngredients.length > 0 && (
+                  {isEditing && ingredients &&
+                    ingredients.length > 0 && (
                       <View className="items-center">
                         <TouchableOpacity
-                          onPress={deleteAll}
-                          className="bg-red-500 h-[30px] rounded-xl justify-center items-center w-[40%]"
+                          onPress={()=>{
+                            Alert.alert(
+                              "Confirm?",
+                              "Are you sure you want to delete all saved ingredients",
+                              [
+                                {
+                                  text: "Yes",
+                                  onPress: tempDeleteAll,
+                                },
+                                {
+                                  text: "No",
+                                  style: 'cancel'
+                                },
+                                
+                              ]
+                            );
+                          }}
+                          className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[40%]"
                         >
-                          <Text className="text-secondary font-poppingsRegular">
+                          <Text className="text-black font-poppingsBold">
                             Delete All
                           </Text>
                         </TouchableOpacity>
@@ -344,18 +452,37 @@ const Profile = () => {
             {!isLoading && (
               <>
                 <View className="pt-2">
-                  {userData.favourites && userData.favourites.length > 0 ? (
-                    userData.favourites.map((item, index) => (
+                  {favourites && favourites.length > 0 ? (
+                    favourites.map((item, index) => (
                       <View
                         key={index}
-                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
+                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[80%] mx-auto"
                       >
-
-                        <View className="flex-col items-center justify-center">
+                        <View className="flex-col gap-1 items-center justify-center">
                           <Image className="w-60 h-60" source={{ uri: item.name.image }} />
                           <Text className="font-poppinsRegular text-black text-lg">
                             {item.name.title}
                           </Text>
+
+                           {isEditing ? (
+                            <TouchableOpacity
+                              onPress={() => tempDeleteItem(item,favourites,setFavourites)}
+                              className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
+                            >
+                              <Text className="text-black font-poppingsBold">
+                                Remove
+                              </Text>
+                            </TouchableOpacity>
+                           ) : (
+                            <TouchableOpacity
+                              onPress=""
+                              className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
+                            >
+                              <Text className="text-black font-poppingsBold">
+                                Detail
+                              </Text>
+                            </TouchableOpacity>
+                          )}
                         </View>
                       </View>
                     ))
@@ -383,8 +510,8 @@ const Profile = () => {
             {!isLoading && (
               <>
                 <View className="pt-2">
-                  {userData.recents && userData.recents.length > 0 ? (
-                    userData.recents.reverse().slice(0,5).map((item, index) => (
+                  {recents && recents.length > 0 ? (
+                    recents.reverse().slice(0,5).map((item, index) => (
                       <View
                         key={index}
                         className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
@@ -395,26 +522,84 @@ const Profile = () => {
                           <Text className="font-poppinsRegular text-black text-lg">
                             {item.name.title}
                           </Text>
+                          {isEditing ? (
+                            <TouchableOpacity
+                              onPress={() => tempDeleteItem(item,recents,setRecents)}
+                              className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
+                            >
+                              <Text className="text-black font-poppingsBold">
+                                Remove
+                              </Text>
+                            </TouchableOpacity>
+                           ) : (
+                            <TouchableOpacity
+                              onPress=""
+                              className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
+                            >
+                              <Text className="text-black font-poppingsBold">
+                                Detail
+                              </Text>
+                            </TouchableOpacity>
+                          )}
                         </View>
                       </View>
                     ))
                   ) : (
                     <Text className="font-poppingsRegular text-secondary">
-                      No favourite recipes
+                      No Recent recipes
                     </Text>
                   )}
                 </View>
               </>
             )}
           </View>
-
-
-          <CustomButton
-            title="Log Out"
-            handlePress={logOut}
-            containerStyles={"mt-7 w-[30%]"}
-            isLoading={isSumbitting}
-          />
+          {!isEditing ? (
+            <View className="justify-center flex-row mt-7">
+              <CustomButton
+                title="Edit Profile"
+                handlePress={editProfile}
+                containerStyles={"w-[30%]"}
+                isLoading={isSumbitting}
+              />
+              <CustomButton
+                title="Log Out"
+                handlePress={logOut}
+                containerStyles={"w-[30%] ml-2"}
+                isLoading={isSumbitting}
+              />
+            </View>
+          ) : (
+            <View className="justify-center flex-row mt-7">
+              <CustomButton
+                title="Save"
+                handlePress={()=>{
+                  Alert.alert(
+                    "Confirm?",
+                    "Do you want to save your profile data?",
+                    [
+                      {
+                        text: "Yes",
+                        onPress: saveChanges,
+                      },
+                      {
+                        text: "No",
+                        style: 'cancel'
+                      },  
+                    ]
+                  );
+                }}
+                containerStyles={"bg-red-400 w-[30%]"}
+                isLoading={isSumbitting}
+              />
+              <CustomButton
+                title="Cancel"
+                handlePress={cancelChanges}
+                containerStyles={"bg-red-400 w-[30%] ml-2"}
+                isLoading={isSumbitting}
+              />
+            </View>
+          )}
+          
         </View>
       </ScrollView>
       <StatusBar backgroundColor="#161622" style="light"></StatusBar>
