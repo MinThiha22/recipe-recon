@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import axios from "axios";
 import { db, auth } from "../../lib/firebase.js";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc,getRecents } from "firebase/firestore";
 import FilterButton from "../../components/FilterButton.jsx";
 import RecipeInfo from '../../components/RecipeInfo.jsx';
 
@@ -52,6 +52,7 @@ const RecipeList = () => {
     setRecipes([]);
     setLoading(true);
     setError("");
+    setError("");
 
     // Refresh ingredients if sorting by ingredients
     if (user && currentIsSortByIngredients) {
@@ -83,8 +84,8 @@ const RecipeList = () => {
     } else {
       // If search bar is empty
       endpoint = currentIsSortByIngredients
-        ? 'https://recipe-recon.onrender.com/api/ingredientsSearch'
-        : 'https://recipe-recon.onrender.com/api/recipeSearch/random';
+        ? "https://recipe-recon.onrender.com/api/ingredientsSearch"
+        : "https://recipe-recon.onrender.com/api/recipeSearch/random";
 
 
       // If sorting by ingredients use ingredients parameter else use no paramters
@@ -112,6 +113,7 @@ const RecipeList = () => {
         response.data.recipes || response.data.results || response.data;
       setRecipes(recipeData);
     } catch (err) {
+      setError("Failed to fetch recipes");
       setError("Failed to fetch recipes");
     } finally {
       setLoading(false);
@@ -146,6 +148,7 @@ const RecipeList = () => {
       addRecents(recipeInfo);
     } catch (err) {
       setError("Failed to fetch recipes");
+      setError("Failed to fetch recipes");
     } finally {
       setLoading(false);
     }
@@ -175,7 +178,7 @@ const RecipeList = () => {
 
     if (docSnap.exists()) {
       setIngredientsList(docSnap.data().list);
-    } else {
+    }  else {
       setIngredientsList([]);
     }
   };
@@ -191,12 +194,9 @@ const RecipeList = () => {
 
   // Get recents from Firebase
   const fetchRecents = async (userId) => {
-    const docRef = doc(db, "recents", userId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      setRecentList(docSnap.data().list);
-    }
+    const recents = await getRecents(userId).catch(() => []);
+    setRecentList(recents);
+    
   };
 
   // Save recents to Firebase
@@ -307,9 +307,18 @@ const RecipeList = () => {
                 <Text className="text-2xl font-chewy text-center text-title">
                   {item.title}
                 </Text>
+                <Text className="text-2xl font-chewy text-center text-title">
+                  {item.title}
+                </Text>
                 {isSortByIngredients && (
                   <>
                     <Text className="text-md font-poppingsRegular text-center text-secondary">
+                      Ingredients:{" "}
+                      {item.usedIngredients && item.usedIngredients.length > 0
+                        ? item.usedIngredients
+                            .map((ingredient) => ingredient.name)
+                            .join(", ")
+                        : ""}
                       Ingredients:{" "}
                       {item.usedIngredients && item.usedIngredients.length > 0
                         ? item.usedIngredients
@@ -318,6 +327,13 @@ const RecipeList = () => {
                         : ""}
                     </Text>
                     <Text className="text-md font-poppingsRegular text-center text-secondary">
+                      {item.missedIngredients &&
+                      item.missedIngredients.length > 0
+                        ? "Missing Ingredients: " +
+                          item.missedIngredients
+                            .map((ingredient) => ingredient.name)
+                            .join(", ")
+                        : ""}
                       {item.missedIngredients &&
                         item.missedIngredients.length > 0
                         ? "Missing Ingredients: " +
@@ -332,8 +348,44 @@ const RecipeList = () => {
             </View>
           )}
         />
-        {selectedRecipe && ( 
-          <RecipeInfo selectedRecipe={selectedRecipe} visible={modalVisible} close={closeModal}></RecipeInfo>
+
+        {selectedRecipe && (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={closeModal}
+          >
+            <View className="flex-1 justify-center items-center m-5 bg-secondary p-5 rounded-lg">
+              <Image
+                className="w-48 h-48"
+                source={{ uri: selectedRecipe.image }}
+              />
+              <Text className="text-3xl font-chewy text-center text-title">
+                {selectedRecipe.title}
+              </Text>
+              <Image
+                className="w-48 h-48"
+                source={{ uri: selectedRecipe.image }}
+              />
+              <Text className="text-3xl font-chewy text-center text-title">
+                {selectedRecipe.title}
+              </Text>
+              <RenderHtml
+                contentWidth={400}
+                source={{ html: selectedRecipe.summary }}
+              />
+              <TouchableOpacity
+                className="bg-blue-500 p-3 rounded-full mt-4"
+                onPress={closeModal}
+              >
+                <Text className="text-white font-bold text-center">
+                  Hide Modal
+                </Text>
+              </TouchableOpacity>
+              <FavouriteButton selectedRecipe={selectedRecipe} />
+            </View>
+          </Modal>
         )}
       </View>
     </SafeAreaView>
