@@ -24,6 +24,7 @@ import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
 import { images, icons } from "../../constants";
 import FormField from "../../components/FormField";
+import RecipeInfo from '../../components/RecipeInfo.jsx';
 
 const Profile = () => {
   const [isSumbitting, setIsSumbitting] = useState(false);
@@ -44,6 +45,8 @@ const Profile = () => {
   const [ingredients, setIngredients] = useState([]);
   const [favourites, setFavourites] = useState([]);
   const [recents, setRecents] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
 
   // Log out current user when log out button is pressed
   const logOut = async () => {
@@ -82,7 +85,7 @@ const Profile = () => {
 
   // Get Dynamic Data savedIngredients favourites, and recents recipes
   const getDynamicData = async () => {
-    if (isEditing) return; 
+    if (isEditing) return;
     setLoading(true);
     try {
       const user = await checkAuthState();
@@ -94,11 +97,11 @@ const Profile = () => {
       const savedIngredients = await getIngredients(userId).catch(() => []);
       const favourites = await getFavourites(userId).catch(() => []);
       const recents = await getRecents(userId).catch(() => []);
-      
+
       setUserData(prevData => ({
-        ...prevData, 
-        savedIngredients, 
-        favourites, 
+        ...prevData,
+        savedIngredients,
+        favourites,
         recents
       }));
 
@@ -112,7 +115,7 @@ const Profile = () => {
   useFocusEffect(
     useCallback(() => {
       getDynamicData();
-      return () => {setIsEditing(false)}; 
+      return () => { setIsEditing(false) };
     }, [])
   );
 
@@ -241,7 +244,7 @@ const Profile = () => {
   };
 
   const editProfile = async () => {
-    if(isLoading) return
+    if (isLoading) return
     setIsEditing(true);
   }
 
@@ -256,7 +259,7 @@ const Profile = () => {
 
       await updateUsername(newUsername);
 
-      if(ingredients.length===0){
+      if (ingredients.length === 0) {
         await deleteAllIngredients(userId);
       } else {
         const ingredientsToDelete = userData.savedIngredients.filter(
@@ -306,6 +309,30 @@ const Profile = () => {
     setRecents(userData.recents);
   }
 
+  // Get specific recipe information from server when recipe is pressed
+  const recipeSelected = async (id) => {
+    try {
+
+      const response = await axios.get(`https://recipe-recon.onrender.com/api/recipeInfo`, {
+        params: { query: id },
+      });
+      const recipeInfo = response.data;
+      setSelectedRecipe(recipeInfo);
+      setModalVisible(true);
+    } catch (err) {
+      setError("Failed to fetch recipes");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedRecipe(null);
+  };
+
+
   return (
     <SafeAreaView className="h-full bg-primary">
       <ScrollView>
@@ -324,12 +351,12 @@ const Profile = () => {
             </Text>
           )}
           {isEditing && (
-            <FormField 
-              title = ""
-              value = {newUsername}
+            <FormField
+              title=""
+              value={newUsername}
               placeholder={userData.username}
-              handleChangeText = {(text)=>{setNewUsername(text)}}
-              otherStyles = "w-[30%]"
+              handleChangeText={(text) => { setNewUsername(text) }}
+              otherStyles="w-[30%]"
             />
           )}
 
@@ -370,7 +397,7 @@ const Profile = () => {
             <Text className="text-lg font-poppinsBold text-secondary">
               Saved ingredients
             </Text>
-            
+
             {isLoading && (
               <Text className=" text-secondary font-poppingsRegular">
                 Loading...Please wait...
@@ -387,7 +414,7 @@ const Profile = () => {
                           <Text className="font-poppingsRegular font-bold text-secondary">
                             {item}
                           </Text>
-                          <TouchableOpacity onPress={() => tempDeleteItem(item,ingredients,setIngredients)}>
+                          <TouchableOpacity onPress={() => tempDeleteItem(item, ingredients, setIngredients)}>
                             <Image source={icons.close} className="w-4 h-4" />
                           </TouchableOpacity>
                         </View>
@@ -408,7 +435,7 @@ const Profile = () => {
                     ingredients.length > 0 && (
                       <View className="items-center">
                         <TouchableOpacity
-                          onPress={()=>{
+                          onPress={() => {
                             Alert.alert(
                               "Confirm?",
                               "Are you sure you want to delete all saved ingredients",
@@ -421,7 +448,7 @@ const Profile = () => {
                                   text: "No",
                                   style: 'cancel'
                                 },
-                                
+
                               ]
                             );
                           }}
@@ -458,32 +485,17 @@ const Profile = () => {
                         key={index}
                         className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[80%] mx-auto"
                       >
-                        <View className="flex-col gap-1 items-center justify-center">
-                          <Image className="w-60 h-60" source={{ uri: item.name.image }} />
-                          <Text className="font-poppinsRegular text-black text-lg">
-                            {item.name.title}
-                          </Text>
-
-                           {isEditing ? (
-                            <TouchableOpacity
-                              onPress={() => tempDeleteItem(item,favourites,setFavourites)}
-                              className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
-                            >
-                              <Text className="text-black font-poppingsBold">
-                                Remove
-                              </Text>
-                            </TouchableOpacity>
-                           ) : (
-                            <TouchableOpacity
-                              onPress=""
-                              className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
-                            >
-                              <Text className="text-black font-poppingsBold">
-                                Detail
-                              </Text>
-                            </TouchableOpacity>
-                          )}
-                        </View>
+                        <TouchableOpacity
+                          className="flex-1 items-center justify-center"
+                          onPress={() => recipeSelected(item.id)}
+                        >
+                          <View className="flex-col gap-1 items-center justify-center">
+                            <Image className="w-60 h-60" source={{ uri: item.name.image }} />
+                            <Text className="font-poppinsRegular text-black text-lg">
+                              {item.name.title}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
                       </View>
                     ))
                   ) : (
@@ -511,37 +523,22 @@ const Profile = () => {
               <>
                 <View className="pt-2">
                   {recents && recents.length > 0 ? (
-                    recents.reverse().slice(0,5).map((item, index) => (
+                    recents.reverse().slice(0, 5).map((item, index) => (
                       <View
                         key={index}
                         className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
                       >
-
-                        <View className="flex-col items-center justify-center">
-                          <Image className="w-60 h-60" source={{ uri: item.name.image }} />
-                          <Text className="font-poppinsRegular text-black text-lg">
-                            {item.name.title}
-                          </Text>
-                          {isEditing ? (
-                            <TouchableOpacity
-                              onPress={() => tempDeleteItem(item,recents,setRecents)}
-                              className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
-                            >
-                              <Text className="text-black font-poppingsBold">
-                                Remove
-                              </Text>
-                            </TouchableOpacity>
-                           ) : (
-                            <TouchableOpacity
-                              onPress=""
-                              className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
-                            >
-                              <Text className="text-black font-poppingsBold">
-                                Detail
-                              </Text>
-                            </TouchableOpacity>
-                          )}
-                        </View>
+                        <TouchableOpacity
+                          className="flex-1 items-center justify-center"
+                          onPress={() => recipeSelected(item.id)}
+                        >
+                          <View className="flex-col items-center justify-center">
+                            <Image className="w-60 h-60" source={{ uri: item.name.image }} />
+                            <Text className="font-poppinsRegular text-black text-lg">
+                              {item.name.title}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
                       </View>
                     ))
                   ) : (
@@ -572,7 +569,7 @@ const Profile = () => {
             <View className="justify-center flex-row mt-7">
               <CustomButton
                 title="Save"
-                handlePress={()=>{
+                handlePress={() => {
                   Alert.alert(
                     "Confirm?",
                     "Do you want to save your profile data?",
@@ -584,7 +581,7 @@ const Profile = () => {
                       {
                         text: "No",
                         style: 'cancel'
-                      },  
+                      },
                     ]
                   );
                 }}
@@ -599,11 +596,16 @@ const Profile = () => {
               />
             </View>
           )}
-          
+
         </View>
       </ScrollView>
+      {
+        selectedRecipe && (
+          <RecipeInfo selectedRecipe={selectedRecipe} visible={modalVisible} close={closeModal}></RecipeInfo>
+        )
+      }
       <StatusBar backgroundColor="#161622" style="light"></StatusBar>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 

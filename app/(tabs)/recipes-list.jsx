@@ -10,11 +10,9 @@ import {
   SafeAreaView,
 } from "react-native";
 import axios from "axios";
-import RenderHtml from "react-native-render-html";
 import { db, auth } from "../../lib/firebase.js";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import FilterButton from "../../components/FilterButton.jsx";
-import FavouriteButton from '../../components/FavouriteButton.jsx';
 import RecipeInfo from '../../components/RecipeInfo.jsx';
 
 const RecipeList = () => {
@@ -136,14 +134,13 @@ const RecipeList = () => {
   ]);
 
   // Get specific recipe information from server when recipe is pressed
-  const imagePressed = async (id) => {
+  const recipeSelected = async (id) => {
     try {
 
       const response = await axios.get(`https://recipe-recon.onrender.com/api/recipeInfo`, {
         params: { query: id },
       });
       const recipeInfo = response.data;
-      console.log(recipeInfo);
       setSelectedRecipe(recipeInfo);
       setModalVisible(true);
       addRecents(recipeInfo);
@@ -304,7 +301,7 @@ const RecipeList = () => {
             <View className="mb-4 bg-primary">
               <TouchableOpacity
                 className="flex-1 items-center justify-center"
-                onPress={() => imagePressed(item.id)}
+                onPress={() => recipeSelected(item.id)}
               >
                 <Image className="w-60 h-60" source={{ uri: item.image }} />
                 <Text className="text-2xl font-chewy text-center text-title">
