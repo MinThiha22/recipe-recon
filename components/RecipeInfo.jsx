@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, Modal} from "react-native";
+import { View, Text, Image, TouchableOpacity, , RenderHtml} from "react-native";
 
 const RecipeInfo = ({ selectedRecipe, visible, close }) => {
     return (
