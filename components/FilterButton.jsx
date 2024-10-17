@@ -1,3 +1,4 @@
+// Update FilterButton.jsx
 import React, { useState } from "react";
 import { Modal, View, Text, TouchableOpacity } from "react-native";
 import { FontAwesome, AntDesign } from "@expo/vector-icons";
@@ -7,29 +8,29 @@ const FilterButton = ({
   setIsVeganFilter,
   isGlutenFreeFilter,
   setIsGlutenFreeFilter,
+  isVegetarianFilter,
+  setIsVegetarianFilter,
   applyFilters,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   return (
     <View>
-      {/* Filter Button with Down Arrow */}
       <TouchableOpacity
         onPress={() => setModalVisible(true)}
-        className="p-3 bg-white rounded-full flex-row items-center justify-center"
+        className="flex-1 h-12 border rounded pl-2 pr-2 flex-row items-center justify-center bg-secondary"
       >
-        <Text className="text-lg text-black">Filter</Text>
-        <AntDesign name="down" size={20} color="black" className="ml-2" />
+        <Text className="text-primary text-md font-bold">Filter</Text>
+        <AntDesign name="down" size={18} color="black" className="ml-2" />
       </TouchableOpacity>
 
-      {/* Modal for Filter Options with Transparent Background */}
+      {/* Modal for Filter Options */}
       <Modal
         visible={modalVisible}
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
-        transparent={true} // This ensures the background is transparent
+        transparent={true}
       >
-        {/* Semi-transparent overlay */}
         <View
           style={{
             flex: 1,
@@ -38,7 +39,6 @@ const FilterButton = ({
             alignItems: "center",
           }}
         >
-          {/* Centered modal content */}
           <View className="w-4/5 bg-primary rounded-lg p-5 mt-auto mb-auto">
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
@@ -47,52 +47,62 @@ const FilterButton = ({
               <AntDesign name="closecircle" size={24} color="white" />
             </TouchableOpacity>
 
-            <Text className="text-lg font-chewy text-title mb-4">
+            <Text className="text-3xl font-chewy text-title mb-4">
               Select Filters
             </Text>
+
+            {/* Vegetarian Filter Toggle */}
+            <TouchableOpacity
+              onPress={() => setIsVegetarianFilter(!isVegetarianFilter)}
+              className="p-3 bg-secondary rounded-md mb-2 w-[80%] flex-row justify-between items-center"
+            >
+              <Text className="text-primary text-lg">Vegetarian</Text>
+              {isVegetarianFilter && (
+                <FontAwesome name="check" size={20} color="green" />
+              )}
+            </TouchableOpacity>
 
             {/* Vegan Filter Toggle */}
             <TouchableOpacity
               onPress={() => setIsVeganFilter(!isVeganFilter)}
-              className="p-3 bg-orange-400 rounded-md mb-2 w-[80%] flex-row justify-between items-center"
+              className="p-3 bg-secondary rounded-md mb-2 w-[80%] flex-row justify-between items-center"
             >
-              <Text className="text-white">Vegan</Text>
+              <Text className="text-primary text-lg">Vegan</Text>
               {isVeganFilter && (
-                <FontAwesome name="check" size={20} color="white" />
+                <FontAwesome name="check" size={20} color="green" />
               )}
             </TouchableOpacity>
 
             {/* Gluten-Free Filter Toggle */}
             <TouchableOpacity
               onPress={() => setIsGlutenFreeFilter(!isGlutenFreeFilter)}
-              className="p-3 bg-orange-400 rounded-md mb-2 w-[80%] flex-row justify-between items-center"
+              className="p-3 bg-secondary rounded-md mb-2 w-[80%] flex-row justify-between items-center"
             >
-              <Text className="text-white">Gluten-Free</Text>
+              <Text className="text-primary text-lg">Gluten-Free</Text>
               {isGlutenFreeFilter && (
-                <FontAwesome name="check" size={20} color="white" />
+                <FontAwesome name="check" size={20} color="green" />
               )}
             </TouchableOpacity>
 
-            {/* Apply Filters Button */}
+            {/* Apply and Remove Filters */}
             <View className="flex-row justify-between mt-4">
               <TouchableOpacity
                 onPress={() => {
                   applyFilters();
                   setModalVisible(false);
                 }}
-                className="p-3 bg-green-500 rounded-md w-[45%] justify-center"
+                className="p-3 bg-green-700 rounded-md w-[45%] justify-center"
               >
                 <Text className="text-white text-center">Apply Filters</Text>
               </TouchableOpacity>
-
-              {/* Remove Filters Button */}
               <TouchableOpacity
                 onPress={() => {
+                  setIsVegetarianFilter(false);
                   setIsVeganFilter(false);
                   setIsGlutenFreeFilter(false);
                   setModalVisible(false);
                 }}
-                className="p-3 bg-red-500 rounded-md w-[45%] justify-center"
+                className="p-3 bg-red-800 rounded-md w-[45%] justify-center"
               >
                 <Text className="text-white text-center">Remove Filters</Text>
               </TouchableOpacity>
