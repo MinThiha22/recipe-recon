@@ -18,8 +18,10 @@ import FavouriteButton from '../../components/FavouriteButton.jsx';
 
 const RecipeList = () => {
   const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("");
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [error, setError] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
@@ -53,12 +55,14 @@ const RecipeList = () => {
     setRecipes([]);
     setLoading(true);
     setError("");
+    setError("");
 
     // Refresh ingredients if sorting by ingredients
     if (user && currentIsSortByIngredients) {
       await fetchIngredients(user.uid);
     }
 
+    let ingredients = ingredientsList.join(",");
     let ingredients = ingredientsList.join(",");
     let endpoint = null;
     let param = {};
@@ -84,6 +88,8 @@ const RecipeList = () => {
     } else {
       // If search bar is empty
       endpoint = currentIsSortByIngredients
+        ? "https://recipe-recon.onrender.com/api/ingredientsSearch"
+        : "https://recipe-recon.onrender.com/api/recipeSearch/random";
         ? 'https://recipe-recon.onrender.com/api/ingredientsSearch'
         : 'https://recipe-recon.onrender.com/api/recipeSearch/random';
 
@@ -111,8 +117,11 @@ const RecipeList = () => {
       const response = await axios.get(endpoint, { params: param });
       const recipeData =
         response.data.recipes || response.data.results || response.data;
+      const recipeData =
+        response.data.recipes || response.data.results || response.data;
       setRecipes(recipeData);
     } catch (err) {
+      setError("Failed to fetch recipes");
       setError("Failed to fetch recipes");
     } finally {
       setLoading(false);
@@ -137,6 +146,12 @@ const RecipeList = () => {
   // Get specific recipe information from server when recipe is pressed
   const imagePressed = async (id) => {
     try {
+      const response = await axios.get(
+        `https://recipe-recon.onrender.com/api/recipeInfo`,
+        {
+          params: { query: id },
+        }
+      );
 
       const response = await axios.get(`https://recipe-recon.onrender.com/api/recipeInfo`, {
         params: { query: id },
@@ -147,6 +162,7 @@ const RecipeList = () => {
       setModalVisible(true);
       addRecents(recipeInfo);
     } catch (err) {
+      setError("Failed to fetch recipes");
       setError("Failed to fetch recipes");
     } finally {
       setLoading(false);
@@ -173,10 +189,12 @@ const RecipeList = () => {
   //get ingredients from firebase
   const fetchIngredients = async (userId) => {
     const docRef = doc(db, "ingredients", userId);
+    const docRef = doc(db, "ingredients", userId);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
       setIngredientsList(docSnap.data().list);
+    } else {
     } else {
       setIngredientsList([]);
     }
@@ -184,6 +202,7 @@ const RecipeList = () => {
 
   //toggle ingredient sort and update the search
   const toggleIngredientsSort = () => {
+    setIsSortByIngredients((prevIsSortByIngredients) => {
     setIsSortByIngredients((prevIsSortByIngredients) => {
       const newIsIngredients = !prevIsSortByIngredients;
       searchRecipes(newIsIngredients, isVeganFilter, isGlutenFreeFilter);
@@ -201,6 +220,7 @@ const RecipeList = () => {
   // Save recents to Firebase
   const saveRecents = async (updatedList) => {
     if (user) {
+      const userRecentsRef = doc(db, "recents", user.uid);
       const userRecentsRef = doc(db, "recents", user.uid);
       await setDoc(userRecentsRef, { list: updatedList });
     }
@@ -302,7 +322,14 @@ const RecipeList = () => {
                 className="flex-1 items-center justify-center"
                 onPress={() => imagePressed(item.id)}
               >
+              <TouchableOpacity
+                className="flex-1 items-center justify-center"
+                onPress={() => imagePressed(item.id)}
+              >
                 <Image className="w-60 h-60" source={{ uri: item.image }} />
+                <Text className="text-2xl font-chewy text-center text-title">
+                  {item.title}
+                </Text>
                 <Text className="text-2xl font-chewy text-center text-title">
                   {item.title}
                 </Text>
@@ -312,11 +339,24 @@ const RecipeList = () => {
                       Ingredients:{" "}
                       {item.usedIngredients && item.usedIngredients.length > 0
                         ? item.usedIngredients
+                            .map((ingredient) => ingredient.name)
+                            .join(", ")
+                        : ""}
+                      Ingredients:{" "}
+                      {item.usedIngredients && item.usedIngredients.length > 0
+                        ? item.usedIngredients
                           .map((ingredient) => ingredient.name)
                           .join(", ")
                         : ""}
                     </Text>
                     <Text className="text-md font-poppingsRegular text-center text-secondary">
+                      {item.missedIngredients &&
+                      item.missedIngredients.length > 0
+                        ? "Missing Ingredients: " +
+                          item.missedIngredients
+                            .map((ingredient) => ingredient.name)
+                            .join(", ")
+                        : ""}
                       {item.missedIngredients &&
                         item.missedIngredients.length > 0
                         ? "Missing Ingredients: " +
@@ -347,6 +387,13 @@ const RecipeList = () => {
               <Text className="text-3xl font-chewy text-center text-title">
                 {selectedRecipe.title}
               </Text>
+              <Image
+                className="w-48 h-48"
+                source={{ uri: selectedRecipe.image }}
+              />
+              <Text className="text-3xl font-chewy text-center text-title">
+                {selectedRecipe.title}
+              </Text>
               <RenderHtml
                 contentWidth={400}
                 source={{ html: selectedRecipe.summary }}
@@ -364,6 +411,7 @@ const RecipeList = () => {
           </Modal>
         )}
       </View>
+    </SafeAreaView>
     </SafeAreaView>
   );
 };
