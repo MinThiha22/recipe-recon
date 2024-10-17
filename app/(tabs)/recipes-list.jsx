@@ -31,9 +31,7 @@ const RecipeList = () => {
   const [isGlutenFreeFilter, setIsGlutenFreeFilter] = useState(false);
   const [ingredientsList, setIngredientsList] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
-  const handleClearInput = () => {
-    setQuery("");
-  };
+  const handleClearInput = () => { setQuery(""); };
 
   // Function to apply all filters
   const applyFilters = () => {
@@ -69,12 +67,6 @@ const RecipeList = () => {
     if (query.trim()) {
       //if search bar is not empty and sorting by ingredients and query, if not sort by query
       endpoint = 'https://recipe-recon.onrender.com/api/recipeSearch';
-
-
-    if (query.trim()) {
-      // If search bar is not empty and sorting by ingredients and query, if not sort by query
-      endpoint = "https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch";
-
       ingredients = currentIsSortByIngredients ? ingredientsList.join(",") : "";
       sort = currentIsSortByIngredients
         ? "min-missing-ingredients"
@@ -238,16 +230,14 @@ const RecipeList = () => {
         {/* Recipe Search Bar */}
         <View className="p-2 flex-row items-center">
           <Text
-            className={`absolute left-2 top-2 text-primary text-md transition-all ${
-              isFocused || query ? "text-sm top-3" : "text-md top-8"
-            } transition-all`}
+            className={`absolute left-2 top-2 text-primary text-md transition-all ${isFocused || query ? "text-sm top-3" : "text-md top-8"
+              } transition-all`}
           >
             Enter your recipe
           </Text>
           <TextInput
-            className={`flex-1 mr-2 bg-secondary text-primary h-12 border rounded pl-2 pr-2 text-md ${
-              isFocused ? "border-title" : "border"
-            }`}
+            className={`flex-1 mr-2 bg-secondary text-primary h-12 border rounded pl-2 pr-2 text-md ${isFocused ? "border-title" : "border"
+              }`}
             placeholder="Enter your recipe"
             placeholderTextColor="gray"
             value={query}
@@ -325,17 +315,17 @@ const RecipeList = () => {
                       Ingredients:{" "}
                       {item.usedIngredients && item.usedIngredients.length > 0
                         ? item.usedIngredients
-                            .map((ingredient) => ingredient.name)
-                            .join(", ")
+                          .map((ingredient) => ingredient.name)
+                          .join(", ")
                         : ""}
                     </Text>
                     <Text className="text-md font-poppingsRegular text-center text-secondary">
                       {item.missedIngredients &&
-                      item.missedIngredients.length > 0
+                        item.missedIngredients.length > 0
                         ? "Missing Ingredients: " +
-                          item.missedIngredients
-                            .map((ingredient) => ingredient.name)
-                            .join(", ")
+                        item.missedIngredients
+                          .map((ingredient) => ingredient.name)
+                          .join(", ")
                         : ""}
                     </Text>
                   </>
@@ -372,7 +362,7 @@ const RecipeList = () => {
                   Hide Modal
                 </Text>
               </TouchableOpacity>
-              <FavouriteButton selectedRecipe= {selectedRecipe}/>
+              <FavouriteButton selectedRecipe={selectedRecipe} />
             </View>
           </Modal>
         )}
