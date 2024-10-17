@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import axios from "axios";
 import multer from "multer";
 import FormData from "form-data";
+import vision from "@google-cloud/vision"
 
 dotenv.config();
 
@@ -139,56 +140,54 @@ app.get("/api/recipeSearch/random", async (req, res) => {
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-app.post("/api/imageRecognition", upload.single("file"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
 
-  try {
-    console.log("Received file:", req.file.originalname);
+app.post("/api/imageRecognition", upload.single('file'), async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+    }
 
-    // Create a new FormData instance
-    const formData = new FormData();
-
-    // Append the file buffer directly to formData
-    formData.append("file", req.file.buffer, {
-      filename: req.file.originalname,
-      contentType: req.file.mimetype,
+    try {
+        console.log("Received file:", req.file.originalname);
+    
+        // Create a Google Vision client
+        const client = new vision.ImageAnnotatorClient({
+          keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+        });
+    
+        // Prepare the image data
+        const image = {
+          content: req.file.buffer.toString('base64'),
+        };
+        
+        //Feature to detect
+        const features = [{ type: 'LABEL_DETECTION' }]; 
+    
+        // Send the request to Google Vision
+        const [response] = await client.annotateImage({ image, features });
+    
+        console.log("Google Vision API response:", response);
+    
+        // Extract description and score
+        const data = response.labelAnnotations.map(item => ({
+            description: item.description,
+            score: item.score,
+        }));
+    
+        res.status(200).json({ data });
+      } catch (error) {
+        console.error("Error using Google Vision:", error.message);
+        res.status(500).json({ error: "Failed to process image with Google Vision" });
+      }
     });
 
-    // Send the file to Spoonacular API
-    const response = await axios.post(
-      "https://api.spoonacular.com/food/images/classify",
-      formData,
-      {
-        params: {
-          apiKey: process.env.SPOONACULAR_API_KEY,
-        },
-        headers: {
-          ...formData.getHeaders(),
-        },
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
-      }
-    );
 
-    console.log("Spoonacular API response:", response.data);
-    res.status(200).json(response.data);
-  } catch (error) {
-    console.error("Error fetching data from Spoonacular API:", error.message);
-    if (error.response) {
-      console.error("Spoonacular API error response:", error.response.data);
-    }
-    res
-      .status(500)
-      .json({ error: "Failed to fetch data from Spoonacular API" });
-  }
-});
 
 app.use((err, req, res, next) => {
   res.status(500).send("Something went wrong!");
 });
 
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running on ${process.env.BASE_URL}:${PORT}`);
 });
+
