@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-  Alert
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -13,9 +13,13 @@ import FormField from "../../components/FormField";
 import CustomButton from "../../components/CustomButton";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import axios from 'axios';
+import axios from "axios";
 import { icons } from "../../constants";
-import { checkAuthState, saveIngredients, getIngredients } from "../../lib/firebase";
+import {
+  checkAuthState,
+  saveIngredients,
+  getIngredients,
+} from "../../lib/firebase";
 import { tryCatch } from "ramda";
 
 const Home = () => {
@@ -25,41 +29,40 @@ const Home = () => {
   const [ingredientsList, setIngredientsList] = useState([]);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [response, setResponse] = useState('');
+  const [error, setError] = useState("");
+  const [response, setResponse] = useState("");
   const [saving, setSaving] = useState(false);
 
   // Handler function to add the entered ingredient to the list
-
   const imageRecognition = async (imageUri) => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('file', {
+      formData.append("file", {
         uri: imageUri,
-        type: 'image/jpeg',
-        name: 'image.jpg',
+        type: "image/jpeg",
+        name: "image.jpg",
       });
       const response = await axios.post(
         `https://roughy-polite-wholly.ngrok-free.app/api/imageRecognition`,
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         }
       );
       setResponse(response.data);
       setIngredient(response.data.category);
-      handleAddIngredient
+      handleAddIngredient;
     } catch (err) {
       console.error("Error fetching recognition response: ", err);
-      setError('Failed to fetch recipes');
+      setError("Failed to fetch recipes");
     } finally {
       setLoading(false);
     }
   };
-  
+
   const openCamera = async () => {
     try {
       let result = await ImagePicker.requestCameraPermissionsAsync();
@@ -88,7 +91,7 @@ const Home = () => {
     }
   };
 
-
+  // Handler function to add an ingredient to the list
   const handleAddIngredient = () => {
     if (ingredient.trim()) {
       setIngredientsList([...ingredientsList, ingredient]);
@@ -109,30 +112,31 @@ const Home = () => {
     setIngredientsList([]); // Clear all ingredients
   };
 
-  
   const handleSave = async () => {
     setSaving(true);
-    try{
+    try {
       const user = await checkAuthState();
-      if(!user) {
+      if (!user) {
         throw new Error("User is not authenticated");
       }
       const userId = user.uid;
-      await saveIngredients(ingredientsList,userId);
-      Alert.alert('Success', 'Your ingredients are saved. You can view them in your profile!');
+      await saveIngredients(ingredientsList, userId);
+      Alert.alert(
+        "Success",
+        "Your ingredients are saved. You can view them in your profile!"
+      );
       setIngredientsList([]);
     } catch (error) {
       console.log(error);
-      Alert.alert('Error', error.message); 
+      Alert.alert("Error", error.message);
     } finally {
       setSaving(false);
     }
-    
   };
 
   const handleClearInput = () => {
-    setIngredient('');
-    setResponse('');
+    setIngredient("");
+    setResponse("");
   };
 
   return (
@@ -167,12 +171,15 @@ const Home = () => {
               value={ingredient}
               handleChangeText={setIngredient}
               otherStyles="mb-2 w-[90%]"
-              
             >
-              <TouchableOpacity onPress={handleClearInput}>
-                <Image 
-                  source={icons.close} 
-                  className="w-5 h-5" 
+              <TouchableOpacity
+                onPress={handleClearInput}
+                testID="clearInputButton"
+                accessibilityLabel="Clear input"
+              >
+                <Image
+                  source={icons.close}
+                  className="w-5 h-5"
                   resizeMode="contain"
                 />
               </TouchableOpacity>
@@ -183,21 +190,32 @@ const Home = () => {
               containerStyles="mt-2 w-[50%] "
             ></CustomButton>
           </View>
-        
+
           <View className="w-[80%]">
-            {loading && <Text className="text-secondary font-poppinsBold mt-3 mb-3 text-lg">Loading...Analysing image....</Text>}
+            {loading && (
+              <Text className="text-secondary font-poppinsBold mt-3 mb-3 text-lg">
+                Loading...Analysing image....
+              </Text>
+            )}
             {error && <Text className="text-red-500 mb-4">{error}</Text>}
-            {!loading && response && 
+            {!loading && response && (
               <>
-                <Text className="text-secondary font-poppinsRegular mt-3 mb-1">Item found with {(response.probability * 100).toFixed(2)}% probability.</Text>
-                <Text className="text-secondary font-poppinsRegular">If item is not correct, please try again!</Text>
+                <Text className="text-secondary font-poppinsRegular mt-3 mb-1">
+                  Item found with {(response.probability * 100).toFixed(2)}%
+                  probability.
+                </Text>
+                <Text className="text-secondary font-poppinsRegular">
+                  If item is not correct, please try again!
+                </Text>
               </>
-            }
+            )}
           </View>
 
           {/* Display the added ingredients */}
           <View className="w-[80%]">
-            <Text className="font-chewy text-xl text-title text-center mt-2 mb-2">New Ingredient List</Text>
+            <Text className="font-chewy text-xl text-title text-center mt-2 mb-2">
+              New Ingredient List
+            </Text>
             {ingredientsList.length === 0 ? (
               <Text className="text-secondary font-poppinsRegular text-center">
                 No ingredients added yet.
@@ -211,8 +229,14 @@ const Home = () => {
                   <Text className="text-lg">{ingredient}</Text>
                   <TouchableOpacity
                     onPress={() => handleRemoveIngredient(index)}
+                    testID={`removeButton-${index}`}
+                    accessibilityLabel={`Remove ${ingredient}`}
                   >
-                    <Image source={icons.close} className="w-4 h-4" onPress={handleRemoveIngredient}></Image>
+                    <Image
+                      source={icons.close}
+                      className="w-4 h-4"
+                      onPress={handleRemoveIngredient}
+                    ></Image>
                   </TouchableOpacity>
                 </View>
               ))
@@ -225,6 +249,7 @@ const Home = () => {
       <View className="flex-row justify-between bg-primary p-4 absolute bottom-0 w-full">
         <TouchableOpacity
           onPress={handleClearAll}
+          accessibilityLabel="Clear All"
           className="w-[50%] justify-center items-center"
         >
           <Text className="text-white text-lg">Clear All</Text>
