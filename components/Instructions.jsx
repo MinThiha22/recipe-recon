@@ -15,6 +15,11 @@ import axios from "axios";
 
 const Instructions = ({ recipe }) => {
   const [instructionsVisible, setInstructionsVisible] = useState(false);
+  const [measurementStyle, setMeasurementStyle] = useState("metric");
+
+  const toggleMeasurementStyle = () => {
+    setMeasurementStyle((prevStyle) => (prevStyle === "us" ? "metric" : "us"));
+  };
 
   return (
     <View>
@@ -49,12 +54,25 @@ const Instructions = ({ recipe }) => {
                       {item.nameClean}
                     </Text>
                     <Text className="text-md font-poppinsSemiBold text-center text-secondary">
-                      {item.measures.us.amount} {item.measures.us.unitLong}
+                      {item.measures[measurementStyle].amount}{" "}
+                      {item.measures[measurementStyle].unitLong}
                     </Text>
                   </View>
                 ))}
               </View>
             </>
+            <View>
+              <TouchableOpacity
+                className="bg-yellow-400 p-3 rounded-full mt-4"
+                onPress={toggleMeasurementStyle}
+              >
+                <Text className="text-white font-bold text-center">
+                  {measurementStyle === "us"
+                    ? "Switch to Metric"
+                    : "Switch to Imperial"}
+                </Text>
+              </TouchableOpacity>
+            </View>
             <>
               <View className="pt-2">
                 <Text className="text-2xl font-poppinsBold text-center text-title pt-5">
@@ -65,7 +83,7 @@ const Instructions = ({ recipe }) => {
                     <Text className="text-2xl font-poppinsBold text-center text-secondary">
                       Step {item.number}
                     </Text>
-                    <Text className="text-md font-poppingsRegular text-center text-secondary">
+                    <Text className="text-md font-poppingsRegular text-center text-secondary pb-5">
                       {item.step}
                     </Text>
                   </View>

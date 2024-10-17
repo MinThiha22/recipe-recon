@@ -45,7 +45,7 @@ const RecipeList = () => {
     let sort = null;
     if (query.trim()) {
       //if search bar is not empty and sorting by ingredients and query, if not sort by query
-      endpoint = "https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch";
+      endpoint = "https://recipe-recon.onrender.com/api/recipeSearch";
 
       ingredients = currentIsSortByIngredients ? ingredientsList.join(",") : "";
 
@@ -57,8 +57,8 @@ const RecipeList = () => {
     } else {
       //if search bar is empty and sorting by ingredients use ingredients search endpoint, if sorting by ingredients use random endpoint
       endpoint = currentIsSortByIngredients
-        ? "https://roughy-polite-wholly.ngrok-free.app/api/ingredientsSearch"
-        : "https://roughy-polite-wholly.ngrok-free.app/api/recipeSearch/random";
+        ? "https://recipe-recon.onrender.com/api/ingredientsSearch"
+        : "https://recipe-recon.onrender.com/api/recipeSearch/random";
 
       //if sorting by ingredients use ingredients parameter else use no paramters
       param = currentIsSortByIngredients ? { ingredients } : {};
@@ -86,7 +86,7 @@ const RecipeList = () => {
   const imagePressed = async (id) => {
     try {
       const response = await axios.get(
-        `https://roughy-polite-wholly.ngrok-free.app/api/recipeInfo`,
+        `https://recipe-recon.onrender.com/api/recipeInfo`,
         {
           params: { query: id },
         }
