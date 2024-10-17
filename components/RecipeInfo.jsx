@@ -1,5 +1,7 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, , RenderHtml} from "react-native";
+import { View, Text, Image, TouchableOpacity, Modal} from "react-native";
+import RenderHtml from "react-native-render-html";
+import FavouriteButton from '../../components/FavouriteButton.jsx';
 
 const RecipeInfo = ({ selectedRecipe, visible, close }) => {
     return (
