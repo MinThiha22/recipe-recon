@@ -29,7 +29,12 @@ const Instructions = ({ recipe }) => {
             <Text className="text-3xl font-chewy text-center text-title pb-5">
               {recipe.title}
             </Text>
-            <Image className="w-60 h-60" source={{ uri: recipe.image }} />
+            <Image
+              className="w-60 h-60"
+              source={{ uri: recipe.image }}
+              testID="recipeImage"
+            />
+
             <Text className="text-2xl font-poppinsBold text-center text-title pt-5">
               Ingredients
             </Text>
@@ -81,8 +86,14 @@ const Instructions = ({ recipe }) => {
       <TouchableOpacity
         className="bg-green-500 p-3 rounded-full mt-4"
         onPress={() => setInstructionsVisible(true)}
+        testID="showInstructionsButton"
       >
-        <Text className="text-white font-bold text-center">Instructions</Text>
+        <Text
+          testID="instructionsHeader"
+          className="text-white font-bold text-center"
+        >
+          Instructions
+        </Text>
       </TouchableOpacity>
     </View>
   );
