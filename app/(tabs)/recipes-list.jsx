@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import RenderHtml from "react-native-render-html";
 import { db, auth } from "../../lib/firebase.js";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc,getRecents } from "firebase/firestore";
 import FilterButton from "../../components/FilterButton.jsx";
 import FavouriteButton from '../../components/FavouriteButton.jsx';
 
@@ -193,12 +193,9 @@ const RecipeList = () => {
 
   // Get recents from Firebase
   const fetchRecents = async (userId) => {
-    const docRef = doc(db, "recents", userId);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      setRecentList(docSnap.data().list);
-    }
+    const recents = await getRecents(userId).catch(() => []);
+    setRecentList(recents);
+    
   };
 
   // Save recents to Firebase

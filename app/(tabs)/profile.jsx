@@ -278,16 +278,18 @@ const Profile = () => {
       const recentsToDelete = userData.recents.filter(
         recent => !recents.includes(recent)
       );
+      
       for (const recent of recentsToDelete) {
+        
         await deleteRecent(recent, userId);
       }
-
+      
       setUserData(prevData => ({
         ...prevData,
-        username: newUsername,
+        username: newUsername !== "" ? newUsername : prevData.username,
         savedIngredients: ingredients,
         favourites: favourites,
-        recent: recents
+        recents: recents,
       }));
 
       Alert.alert("Success", "Changes saved successfully!");
