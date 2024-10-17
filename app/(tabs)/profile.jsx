@@ -254,7 +254,10 @@ const Profile = () => {
       }
       const userId = user.uid;
 
-      await updateUsername(newUsername);
+      if(newUsername!==''){
+        await updateUsername(newUsername);
+      }
+      
 
       if(ingredients.length===0){
         await deleteAllIngredients(userId);
@@ -286,7 +289,7 @@ const Profile = () => {
       
       setUserData(prevData => ({
         ...prevData,
-        username: newUsername !== "" ? newUsername : prevData.username,
+        username: newUsername !== '' ? newUsername : prevData.username,
         savedIngredients: ingredients,
         favourites: favourites,
         recents: recents,
