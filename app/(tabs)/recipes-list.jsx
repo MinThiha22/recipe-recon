@@ -13,7 +13,6 @@ import axios from "axios";
 import RenderHtml from "react-native-render-html";
 import { db, auth } from "../../lib/firebase.js";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import Button from "../../components/Button.jsx";
 import FilterButton from "../../components/FilterButton.jsx";
 
 const RecipeList = () => {
@@ -27,18 +26,29 @@ const RecipeList = () => {
   const [recentList, setRecentList] = useState([]);
   const [user, setUser] = useState(null);
   const [isSortByIngredients, setIsSortByIngredients] = useState(false);
+  const [isVegetarianFilter, setIsVegetarianFilter] = useState(false);
   const [isVeganFilter, setIsVeganFilter] = useState(false);
   const [isGlutenFreeFilter, setIsGlutenFreeFilter] = useState(false);
   const [ingredientsList, setIngredientsList] = useState([]);
+  const [isFocused, setIsFocused] = useState(false);
+  const handleClearInput = () => {
+    setQuery("");
+  };
 
   // Function to apply all filters
   const applyFilters = () => {
-    searchRecipes(isSortByIngredients, isVeganFilter, isGlutenFreeFilter);
+    searchRecipes(
+      isSortByIngredients,
+      isVegetarianFilter,
+      isVeganFilter,
+      isGlutenFreeFilter
+    );
   };
 
   // Get api recipes data from server (modified)
   const searchRecipes = async (
     currentIsSortByIngredients,
+    currentIsVegetarianFilter,
     currentIsVeganFilter,
     currentIsGlutenFreeFilter
   ) => {
@@ -70,6 +80,7 @@ const RecipeList = () => {
         query,
         ingredients,
         sort,
+        isVegetarian: currentIsVegetarianFilter,
         isVegan: currentIsVeganFilter,
         isGlutenFree: currentIsGlutenFreeFilter,
       };
@@ -83,6 +94,10 @@ const RecipeList = () => {
       param = currentIsSortByIngredients ? { ingredients } : {};
 
       // Apply filters
+      if (currentIsVegetarianFilter) {
+        param.isVegetarian = true;
+      }
+
       if (currentIsVeganFilter) {
         param.isVegan = true;
       }
@@ -107,8 +122,18 @@ const RecipeList = () => {
 
   // Call searchRecipes on start and when sort/filter states change
   useEffect(() => {
-    searchRecipes(isSortByIngredients, isVeganFilter, isGlutenFreeFilter);
-  }, [isSortByIngredients, isVeganFilter, isGlutenFreeFilter]);
+    searchRecipes(
+      isSortByIngredients,
+      isVegetarianFilter,
+      isVeganFilter,
+      isGlutenFreeFilter
+    );
+  }, [
+    isSortByIngredients,
+    isVegetarianFilter,
+    isVeganFilter,
+    isGlutenFreeFilter,
+  ]);
 
   // Get specific recipe information from server when recipe is pressed
   const imagePressed = async (id) => {
@@ -254,39 +279,55 @@ const RecipeList = () => {
           Recipe Search
         </Text>
 
-        {/* Ingredients Search Bar */}
-        <TextInput
-          className="border border-gray-300 rounded p-2 mb-4 text-secondary"
-          placeholder="Enter ingredients"
-          value={query}
-          onChangeText={setQuery}
-        />
-
-        {/* Sort Button */}
-        <TouchableOpacity
-          className="bg-title p-3 rounded-full mt-4"
-          onPress={toggleIngredientsSort}
-          disabled={loading}
-        >
-          <Text className="text-white font-bold text-center">
-            {isSortByIngredients
-              ? "Unsort by your ingredients"
-              : "Sort by your ingredients"}
+        {/* Recipe Search Bar */}
+        <View className="p-2 flex-row items-center">
+          <Text
+            className={`absolute left-2 top-2 text-primary text-md transition-all ${
+              isFocused || query ? "text-sm top-3" : "text-md top-8"
+            } transition-all`}
+          >
+            Enter your recipe
           </Text>
-        </TouchableOpacity>
+          <TextInput
+            className={`flex-1 mr-2 bg-secondary text-primary h-12 border rounded pl-2 pr-2 text-md ${
+              isFocused ? "border-title" : "border"
+            }`}
+            placeholder="Enter your recipe"
+            placeholderTextColor="gray"
+            value={query}
+            onChangeText={setQuery}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+          />
+        </View>
 
-        {/* Filter Button */}
-        <FilterButton
-          isVeganFilter={isVeganFilter}
-          setIsVeganFilter={setIsVeganFilter}
-          isGlutenFreeFilter={isGlutenFreeFilter}
-          setIsGlutenFreeFilter={setIsGlutenFreeFilter}
-          applyFilters={applyFilters}
-        />
+        {/* Buttons Row - Sort and Filter */}
+        <View className="p-2 flex-row items-center justify-between mb mt">
+          <TouchableOpacity
+            onPress={toggleIngredientsSort}
+            disabled={loading}
+            className="flex-1 h-12 border rounded pl-2 pr-2 mr-1 bg-secondary justify-center"
+          >
+            <Text className="text-primary text-md text-center font-bold">
+              {isSortByIngredients
+                ? "Unsort by your ingredients"
+                : "Sort by your ingredients"}
+            </Text>
+          </TouchableOpacity>
+          <FilterButton
+            isVegetarianFilter={isVegetarianFilter}
+            setIsVegetarianFilter={setIsVegetarianFilter}
+            isVeganFilter={isVeganFilter}
+            setIsVeganFilter={setIsVeganFilter}
+            isGlutenFreeFilter={isGlutenFreeFilter}
+            setIsGlutenFreeFilter={setIsGlutenFreeFilter}
+            applyFilters={applyFilters}
+          />
+        </View>
 
         {/* Search Button */}
         <TouchableOpacity
-          className="bg-blue-500 p-3 rounded-full mt-4"
+          className="bg-secondary p-4 rounded mt-2 border"
           onPress={() =>
             searchRecipes(
               isSortByIngredients,
@@ -296,7 +337,7 @@ const RecipeList = () => {
           }
           disabled={loading}
         >
-          <Text className="text-white font-bold text-center">Search</Text>
+          <Text className="text-primary font-bold text-center">Search</Text>
         </TouchableOpacity>
 
         {/* Loading and Error Messages */}

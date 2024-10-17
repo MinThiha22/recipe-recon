@@ -15,7 +15,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/recipeSearch", async (req, res) => {
-  const { query, ingredients, sort, isVegan, isGlutenFree } = req.query;
+  const { query, ingredients, sort, isVegetarian, isVegan, isGlutenFree } =
+    req.query;
 
   if (!query) {
     return res.status(400).json({ error: "Query parameter is required" });
@@ -31,9 +32,11 @@ app.get("/api/recipeSearch", async (req, res) => {
     apiKey: process.env.SPOONACULAR_API_KEY,
   };
 
-  // Add Vegan filter if applied
+  // Apply dietary filters
   if (isVegan === "true") {
     params.diet = "vegan";
+  } else if (isVegetarian === "true") {
+    params.diet = "vegetarian";
   }
 
   // Add Gluten-Free filter if applied
