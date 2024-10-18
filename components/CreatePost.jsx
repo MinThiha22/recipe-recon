@@ -33,10 +33,10 @@ const CreatePost = ({ onClose }) => {
 
   //post function to save post to firebase
   const post = async () => {
+    setLoading(true);
     await getData(user);
     if (title && body) {
       try {
-        setLoading(true);
         const postId = `${Date.now()}_${user.uid}`;
         await setDoc(doc(db, "posts", postId), {
           postId,
@@ -80,6 +80,7 @@ const CreatePost = ({ onClose }) => {
 
   //function pick image for post
   const pickImage = async () => {
+    setLoading(true);
     Alert.alert(
       "Select Image Source",
       "Choose from where to get your picture:",
@@ -108,6 +109,7 @@ const CreatePost = ({ onClose }) => {
           "Permission denied",
           "Sorry, we need camera permissions to take a picture!"
         );
+        setLoading(false);
         return;
       }
 
@@ -119,6 +121,10 @@ const CreatePost = ({ onClose }) => {
 
       if (!pickerResult.canceled) {
         await uploadImage(pickerResult.assets[0].uri);
+      } 
+      else
+      {
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error opening camera:", error);
@@ -126,6 +132,7 @@ const CreatePost = ({ onClose }) => {
         "Error",
         "Something went wrong while trying to open the camera. Please try again."
       );
+      setLoading(false);
     }
   };
 
@@ -138,6 +145,7 @@ const CreatePost = ({ onClose }) => {
           "Permission denied",
           "Sorry, we need permission to select picture!"
         );
+        setLoading(false);
         return;
       }
       let pickerResult = await ImagePicker.launchImageLibraryAsync({
@@ -148,9 +156,14 @@ const CreatePost = ({ onClose }) => {
       });
       if (!pickerResult.canceled) {
         uploadImage(pickerResult.assets[0].uri);
+      } 
+      else
+      {
+        setLoading(false);
       }
     } catch (error) {
       Alert.alert(error.message);
+      setLoading(false);
     }
   };
 
@@ -170,6 +183,7 @@ const CreatePost = ({ onClose }) => {
     } catch (error) {
       Alert.alert("Error", error.message);
     }
+    setLoading(false);
   };
 
   //function for handling modal closing
