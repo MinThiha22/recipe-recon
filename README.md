@@ -30,9 +30,9 @@ Simply scan the ingredients you have on hand, and our app will suggest mouth-wat
 1. Set up an iOS device with Expo Go.  
    Scan the QR code to download the app from the App Store, or visit the Expo Go page on the [App Store](https://apps.apple.com/us/app/expo-go/id982107779).  
    <img src="./assets/images/qr.png" alt="QR Code" width="200" height="200" />
-2. Download [release branch](https://github.com/MinThiha22/recipe-recon/archive/refs/heads/main.zip) as a zip file.
+2. Download [release branch](https://github.com/MinThiha22/recipe-recon/archive/refs/heads/main.zip) and unzip the folder.
 
-3. Run `npm install` to get all the required packages.
+3. Run `npm install` from terminal in downloaded folder to get all the required packages.
 
 ```bash
    npm install
