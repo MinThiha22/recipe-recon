@@ -1,16 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Image, TouchableOpacity, Modal } from "react-native";
 import RenderHtml from "react-native-render-html";
 import FavouriteButton from "../components/FavouriteButton.jsx";
 import Instructions from "./Instructions.jsx";
 
-const RecipeInfo = ({ selectedRecipe, visible, close }) => {
+const RecipeInfo = ({
+  selectedRecipe,
+  visible,
+  close,
+  favouriteToggled,
+  setFavouriteToggled,
+}) => {
+  const handleFavouriteToggle = () => {
+    setFavouriteToggled(true);
+  };
+
   return (
     <Modal
       animationType="slide"
       transparent={true}
       visible={visible}
-      onRequestClose={close}
+      onRequestClose={close} // Close should handle data refresh in parent
     >
       <View className="items-center">
         <View className="w-11/12 max-w-md mt-24 bg-secondary p-5 rounded-xl shadow-lg">
@@ -34,10 +44,14 @@ const RecipeInfo = ({ selectedRecipe, visible, close }) => {
             <Text className="text-white font-bold text-center">Hide</Text>
           </TouchableOpacity>
           <Instructions recipe={selectedRecipe}></Instructions>
-          <FavouriteButton selectedRecipe={selectedRecipe} />
+          <FavouriteButton
+            selectedRecipe={selectedRecipe}
+            onFavouriteToggle={handleFavouriteToggle} // Pass the callback
+          />
         </View>
       </View>
     </Modal>
   );
 };
+
 export default RecipeInfo;

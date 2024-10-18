@@ -62,6 +62,7 @@ const Profile = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [commentsVisible, setCommentsVisible] = useState(null);
+  const [favouriteToggled, setFavouriteToggled] = useState(false);
 
   // Log out current user when log out button is pressed
   const logOut = async () => {
@@ -375,7 +376,10 @@ const Profile = () => {
   const closeModal = () => {
     setModalVisible(false);
     setSelectedRecipe(null);
-    getDynamicData();
+    if (favouriteToggled) {
+      getDynamicData();
+      setFavouriteToggled(false); // Reset the flag
+    }
   };
 
   //toggle comments visibility
@@ -795,6 +799,8 @@ const Profile = () => {
           selectedRecipe={selectedRecipe}
           visible={modalVisible}
           close={closeModal}
+          favouriteToggled={favouriteToggled} // Pass the state
+          setFavouriteToggled={setFavouriteToggled} // Pass the setter function
         ></RecipeInfo>
       )}
       <StatusBar backgroundColor="#161622" style="light"></StatusBar>
