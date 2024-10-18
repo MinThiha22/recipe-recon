@@ -1,5 +1,5 @@
-import { Alert, View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { Alert, View, Text, ScrollView, TouchableOpacity, Image, Modal,RenderHtml } from "react-native";
+import { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import CustomButton from "../../components/CustomButton";
@@ -323,6 +323,7 @@ const Profile = () => {
       });
       const recipeInfo = response.data;
       setSelectedRecipe(recipeInfo);
+      setRecents(userData.recents);
       setModalVisible(true);
       } catch (error) {
         console.log(error.message);
@@ -507,7 +508,7 @@ const Profile = () => {
                             </TouchableOpacity>
                            ) : (
                             <TouchableOpacity
-                              onPress={() => recipeSelected(item.id)}
+                              onPress= {() => recipeSelected(item.id)}
                               className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
                             >
                               <Text className="text-black font-poppingsBold">
