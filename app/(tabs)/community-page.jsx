@@ -4,6 +4,7 @@ import CreatePost from '../../components/CreatePost';
 import { db } from '../../lib/firebase';
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import Comments from '../../components/Comments';
+import BookmarkButton from '../../components/BookmarkButton';
 
 const CommunityPage = () => {
 
@@ -45,6 +46,7 @@ const CommunityPage = () => {
                         <Text className="text-gray-400 text-sm">{item.name}</Text>
                     </View>
                 <View>
+                    <BookmarkButton selectedPost={item}></BookmarkButton>
                     <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => toggleCommentsVisibility(item.id)}>
                         <Text className="text-white font-bold text-center">View Comments</Text>
                     </TouchableOpacity>

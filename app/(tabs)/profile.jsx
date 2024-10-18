@@ -19,6 +19,8 @@ import {
   deleteFavourite,
   getRecents,
   deleteRecent,
+  getBookmarks,
+  deleteBookmark,
 } from "../../lib/firebase";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
@@ -39,6 +41,7 @@ const Profile = () => {
     savedIngredients: [],
     favourites: [],
     recents: [],
+    bookmarks: [],
   });
   const [isLoading, setLoading] = useState(false);
   const [isLoadingInfo, setLoadingInfo] = useState(false);
@@ -46,6 +49,7 @@ const Profile = () => {
   const [ingredients, setIngredients] = useState([]);
   const [favourites, setFavourites] = useState([]);
   const [recents, setRecents] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
@@ -85,6 +89,7 @@ const Profile = () => {
   };
 
   // Get Dynamic Data savedIngredients favourites, and recents recipes
+  //added bookmarks
   const getDynamicData = async () => {
     if (isEditing) return; 
     setLoading(true);
@@ -98,12 +103,14 @@ const Profile = () => {
       const savedIngredients = await getIngredients(userId).catch(() => []);
       const favourites = await getFavourites(userId).catch(() => []);
       const recents = await getRecents(userId).catch(() => []);
+      const bookmarks = await getBookmarks(userId).catch(() => []);
       
       setUserData(prevData => ({
         ...prevData, 
         savedIngredients, 
         favourites, 
-        recents
+        recents,
+        bookmarks
       }));
 
     } catch (error) {
@@ -128,6 +135,7 @@ const Profile = () => {
     setIngredients(userData.savedIngredients);
     setFavourites(userData.favourites);
     setRecents(userData.recents);
+    setBookmarks(userData.recents); 
   }, [userData]);
 
 
@@ -287,8 +295,15 @@ const Profile = () => {
       );
       
       for (const recent of recentsToDelete) {
-        
         await deleteRecent(recent, userId);
+      }
+
+      const bookmarksToDelete = userData.bookmarks.filter(
+        recent => !bookmarks.includes(bookmarks)
+      );
+
+      for(const bookmark of bookmarksToDelete) {
+        await deleteBookmark(bookmark, userId);
       }
       
       setUserData(prevData => ({
@@ -297,6 +312,7 @@ const Profile = () => {
         savedIngredients: ingredients,
         favourites: favourites,
         recents: recents,
+        bookmarks: bookmarks,
       }));
 
       Alert.alert("Success", "Changes saved successfully!");
@@ -313,6 +329,7 @@ const Profile = () => {
     setIngredients(userData.savedIngredients);
     setFavourites(userData.favourites);
     setRecents(userData.recents);
+    setBookmarks(userData.bookmarks);
   }
 
   // Get specific recipe information from server when recipe is pressed
@@ -472,6 +489,62 @@ const Profile = () => {
           </View>
 
           <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
+
+          <View className="items-center">
+            <Text className="text-lg font-poppinsBold text-secondary">
+              Bookmarks
+            </Text>
+            {isLoading && (
+              <Text className=" text-secondary font-poppingsRegular">
+                Loading...Please wait...
+              </Text>
+            )}
+            {!isLoading && (
+              <>
+                <View className="pt-2">
+                  {bookmarks && bookmarks.length > 0 ? (
+                    bookmarks.map((item, index) => (
+                      <View
+                        key={index}
+                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[80%] mx-auto"
+                      >
+                        <View className="flex-col gap-1 items-center justify-center">
+                          <Image className="w-60 h-60" source={{ uri: item.name.image }} />
+                          <Text className="font-poppinsRegular text-black text-lg">
+                            {item.name.title}
+                          </Text>
+
+                           {isEditing ? (
+                            <TouchableOpacity
+                              onPress={() => tempDeleteItem(item,bookmarks,setBookmarks)}
+                              className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
+                            >
+                              <Text className="text-black font-poppingsBold">
+                                Remove
+                              </Text>
+                            </TouchableOpacity>
+                           ) : (
+                            <TouchableOpacity
+                              onPress= {() => recipeSelected(item.id)}
+                              className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
+                            >
+                              <Text className="text-black font-poppingsBold">
+                                Detail
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      </View>
+                    ))
+                  ) : (
+                    <Text className="font-poppingsRegular text-secondary">
+                      No bookmarked recipes
+                    </Text>
+                  )}
+                </View>
+              </>
+            )}
+          </View>
 
           <View className="items-center">
             <Text className="text-lg font-poppinsBold text-secondary">
