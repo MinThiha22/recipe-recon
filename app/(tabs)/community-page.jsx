@@ -12,6 +12,7 @@ import CreatePost from "../../components/CreatePost";
 import { db } from "../../lib/firebase";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import Comments from "../../components/Comments";
+import BookmarkButton from "../../components/BookmarkButton";
 import { images } from "../../constants";
 
 const CommunityPage = () => {
@@ -54,20 +55,14 @@ const CommunityPage = () => {
         </View>
         <Text className="text-gray-600 mt-2">{item.body}</Text>
         <View className="flex-row items-center mt-2">
-          {item.profilePicture ? (
-            <Image
-              className="w-5 h-5 mr-1 rounded-full border-black border-1"
-              source={{ uri: item.profilePicture }}
-            />
-          ) : (
-            <Image
-              className="w-5 h-5 mr-1 rounded-full border-black border-1"
-              source={images.profilePlaceHolder}
-            />
-          )}
+          <Image
+            className="w-5 h-5 mr-1 rounded-full border-black border-1"
+            source={{ uri: item.profilePicture }}
+          />
           <Text className="text-gray-400 text-sm">{item.name}</Text>
         </View>
         <View>
+          <BookmarkButton selectedPost={item}></BookmarkButton>
           <TouchableOpacity
             className="bg-primary p-3 rounded-full mt-4"
             onPress={() => toggleCommentsVisibility(item.id)}
@@ -107,8 +102,57 @@ const CommunityPage = () => {
       <Text className="text-3xl mt-5 text-title font-chewy">
         Community Posts
       </Text>
+
+      <Text className="text-gray-600 mt-2">{item.body}</Text>
+      <View className="flex-row items-center mt-2">
+        {item.profilePicture ? (
+          <Image
+            className="w-5 h-5 mr-1 rounded-full border-black border-1"
+            source={{ uri: item.profilePicture }}
+          />
+        ) : (
+          <Image
+            className="w-5 h-5 mr-1 rounded-full border-black border-1"
+            source={images.profilePlaceHolder}
+          />
+        )}
+        <Text className="text-gray-400 text-sm">{item.name}</Text>
+      </View>
+      <View>
+        <TouchableOpacity
+          className="bg-primary p-3 rounded-full mt-4"
+          onPress={() => toggleCommentsVisibility(item.id)}
+        >
+          <Text className="text-white font-bold text-center">
+            View Comments
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={commentsVisible === item.postId}
+        onRequestClose={() => setCommentsVisible(null)}
+      >
+        <View className="flex-1 m-2 justify-end">
+          <View className="h-3/4 bg-white rounded-lg shadow pl-4 pr-4">
+            <TouchableOpacity
+              className="bg-primary p-3 rounded-full mt-4"
+              onPress={() => setCommentsVisible(null)}
+            >
+              <Text className="text-white font-bold text-center">
+                Hide Comments
+              </Text>
+            </TouchableOpacity>
+            <Comments postId={item.postId} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
+
+  //function to display title
 
   return (
     <SafeAreaView className="h-full bg-primary">
