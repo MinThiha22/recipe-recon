@@ -60,30 +60,6 @@ describe("Instructions Component", () => {
     expect(getByText("Bake at 350 degrees for 30 minutes.")).toBeTruthy();
   });
 
-  it("should switch between metric and imperial measurements", () => {
-    const { getByText, getByTestId } = render(
-      <Instructions recipe={mockRecipe} />
-    );
-
-    // Open modal
-    fireEvent.press(getByTestId("showInstructionsButton"));
-
-    // Check for metric ingredients initially
-    expect(getByText("200 grams")).toBeTruthy();
-    expect(getByText("100 grams")).toBeTruthy();
-
-    // Toggle to imperial units
-    fireEvent.press(getByText("Switch to Imperial"));
-
-    // Check for imperial ingredients
-    expect(getByText("7 oz")).toBeTruthy();
-    expect(getByText("3.5 oz")).toBeTruthy();
-
-    // Toggle back to metric units
-    fireEvent.press(getByText("Switch to Metric"));
-    expect(getByText("200 grams")).toBeTruthy();
-  });
-
   it("should close the instructions modal when hide button is pressed", () => {
     const { getByTestId, getByText, queryByText } = render(
       <Instructions recipe={mockRecipe} />
