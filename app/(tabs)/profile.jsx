@@ -1,4 +1,4 @@
-import { Alert, View, Text, ScrollView, TouchableOpacity, Image, Modal,RenderHtml } from "react-native";
+import { Alert, View, Text, ScrollView, TouchableOpacity, Image, Modal, RenderHtml } from "react-native";
 import { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -28,6 +28,7 @@ import { images, icons } from "../../constants";
 import FormField from "../../components/FormField";
 import RecipeInfo from '../../components/RecipeInfo.jsx';
 import axios from "axios";
+import Comments from '../../components/Comments';
 
 const Profile = () => {
   const [isSumbitting, setIsSumbitting] = useState(false);
@@ -52,6 +53,7 @@ const Profile = () => {
   const [bookmarks, setBookmarks] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [commentsVisible, setCommentsVisible] = useState(null);
 
   // Log out current user when log out button is pressed
   const logOut = async () => {
@@ -88,10 +90,9 @@ const Profile = () => {
     }
   };
 
-  // Get Dynamic Data savedIngredients favourites, and recents recipes
-  //added bookmarks
+  // Get Dynamic Data savedIngredients favourites, and recents recipes and bookmarks
   const getDynamicData = async () => {
-    if (isEditing) return; 
+    if (isEditing) return;
     setLoading(true);
     try {
       const user = await checkAuthState();
@@ -104,11 +105,11 @@ const Profile = () => {
       const favourites = await getFavourites(userId).catch(() => []);
       const recents = await getRecents(userId).catch(() => []);
       const bookmarks = await getBookmarks(userId).catch(() => []);
-      
+
       setUserData(prevData => ({
-        ...prevData, 
-        savedIngredients, 
-        favourites, 
+        ...prevData,
+        savedIngredients,
+        favourites,
         recents,
         bookmarks
       }));
@@ -123,7 +124,7 @@ const Profile = () => {
   useFocusEffect(
     useCallback(() => {
       getDynamicData();
-      return () => {setIsEditing(false)}; 
+      return () => { setIsEditing(false) };
     }, [])
   );
 
@@ -135,7 +136,7 @@ const Profile = () => {
     setIngredients(userData.savedIngredients);
     setFavourites(userData.favourites);
     setRecents(userData.recents);
-    setBookmarks(userData.recents); 
+    setBookmarks(userData.bookmarks);
   }, [userData]);
 
 
@@ -253,7 +254,7 @@ const Profile = () => {
   };
 
   const editProfile = async () => {
-    if(isLoading) return
+    if (isLoading) return
     setIsEditing(true);
   }
 
@@ -266,12 +267,12 @@ const Profile = () => {
       }
       const userId = user.uid;
 
-      if(newUsername!==''){
+      if (newUsername !== '') {
         await updateUsername(newUsername);
       }
-      
 
-      if(ingredients.length===0){
+
+      if (ingredients.length === 0) {
         await deleteAllIngredients(userId);
       } else {
         const ingredientsToDelete = userData.savedIngredients.filter(
@@ -293,7 +294,7 @@ const Profile = () => {
       const recentsToDelete = userData.recents.filter(
         recent => !recents.includes(recent)
       );
-      
+
       for (const recent of recentsToDelete) {
         await deleteRecent(recent, userId);
       }
@@ -302,10 +303,10 @@ const Profile = () => {
         recent => !bookmarks.includes(bookmarks)
       );
 
-      for(const bookmark of bookmarksToDelete) {
+      for (const bookmark of bookmarksToDelete) {
         await deleteBookmark(bookmark, userId);
       }
-      
+
       setUserData(prevData => ({
         ...prevData,
         username: newUsername !== '' ? newUsername : prevData.username,
@@ -342,9 +343,9 @@ const Profile = () => {
       setSelectedRecipe(recipeInfo);
       setRecents(userData.recents);
       setModalVisible(true);
-      } catch (error) {
-        console.log(error.message);
-      } finally {
+    } catch (error) {
+      console.log(error.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -353,6 +354,11 @@ const Profile = () => {
   const closeModal = () => {
     setModalVisible(false);
     setSelectedRecipe(null);
+  };
+
+  //toggle comments visibility
+  const toggleCommentsVisibility = (postId) => {
+    setCommentsVisible((prev) => prev === postId ? null : postId);
   };
 
 
@@ -374,12 +380,12 @@ const Profile = () => {
             </Text>
           )}
           {isEditing && (
-            <FormField 
-              title = ""
-              value = {newUsername}
+            <FormField
+              title=""
+              value={newUsername}
               placeholder={userData.username}
-              handleChangeText = {(text)=>{setNewUsername(text)}}
-              otherStyles = "w-[30%]"
+              handleChangeText={(text) => { setNewUsername(text) }}
+              otherStyles="w-[30%]"
             />
           )}
 
@@ -420,7 +426,7 @@ const Profile = () => {
             <Text className="text-lg font-poppinsBold text-secondary">
               Saved ingredients
             </Text>
-            
+
             {isLoading && (
               <Text className=" text-secondary font-poppingsRegular">
                 Loading...Please wait...
@@ -437,7 +443,7 @@ const Profile = () => {
                           <Text className="font-poppingsRegular font-bold text-secondary">
                             {item}
                           </Text>
-                          <TouchableOpacity onPress={() => tempDeleteItem(item,ingredients,setIngredients)}>
+                          <TouchableOpacity onPress={() => tempDeleteItem(item, ingredients, setIngredients)}>
                             <Image source={icons.close} className="w-4 h-4" />
                           </TouchableOpacity>
                         </View>
@@ -458,7 +464,7 @@ const Profile = () => {
                     ingredients.length > 0 && (
                       <View className="items-center">
                         <TouchableOpacity
-                          onPress={()=>{
+                          onPress={() => {
                             Alert.alert(
                               "Confirm?",
                               "Are you sure you want to delete all saved ingredients",
@@ -471,7 +477,7 @@ const Profile = () => {
                                   text: "No",
                                   style: 'cancel'
                                 },
-                                
+
                               ]
                             );
                           }}
@@ -503,35 +509,48 @@ const Profile = () => {
               <>
                 <View className="pt-2">
                   {bookmarks && bookmarks.length > 0 ? (
-                    bookmarks.map((item, index) => (
+                    bookmarks.reverse().map((item, index) => (
                       <View
                         key={index}
                         className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[80%] mx-auto"
                       >
                         <View className="flex-col gap-1 items-center justify-center">
-                          <Image className="w-60 h-60" source={{ uri: item.name.image }} />
-                          <Text className="font-poppinsRegular text-black text-lg">
+                        <Text className="font-poppinsRegular text-black text-lg">
                             {item.name.title}
                           </Text>
+                          <Image className="w-60 h-60" source={{ uri: item.name.imageUrl }} />
+                          <Text className="text-gray-600 mt-2">{item.name.body}</Text>
 
-                           {isEditing ? (
+                          {isEditing ? (
                             <TouchableOpacity
-                              onPress={() => tempDeleteItem(item,bookmarks,setBookmarks)}
+                              onPress={() => tempDeleteItem(item, bookmarks, setBookmarks)}
                               className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
                             >
                               <Text className="text-black font-poppingsBold">
                                 Remove
                               </Text>
                             </TouchableOpacity>
-                           ) : (
-                            <TouchableOpacity
-                              onPress= {() => recipeSelected(item.id)}
-                              className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
-                            >
-                              <Text className="text-black font-poppingsBold">
-                                Detail
-                              </Text>
-                            </TouchableOpacity>
+                          ) : (
+                            <View>
+                              <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => toggleCommentsVisibility(item.id)}>
+                                <Text className="text-white font-bold text-center">View Comments</Text>
+                              </TouchableOpacity>
+                              <Modal
+                                animationType="slide"
+                                transparent={true}
+                                visible={commentsVisible === item.name.postId}
+                                onRequestClose={() => setCommentsVisible(null)}
+                              >
+                                <View className="flex-1 m-2 justify-end">
+                                  <View className="h-3/4 bg-white rounded-lg shadow pl-4 pr-4">
+                                    <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => setCommentsVisible(null)}>
+                                      <Text className="text-white font-bold text-center">Hide Comments</Text>
+                                    </TouchableOpacity>
+                                    <Comments postId={item.name.postId} />
+                                  </View>
+                                </View>
+                              </Modal>
+                            </View>
                           )}
                         </View>
                       </View>
@@ -545,6 +564,7 @@ const Profile = () => {
               </>
             )}
           </View>
+          <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
 
           <View className="items-center">
             <Text className="text-lg font-poppinsBold text-secondary">
@@ -570,18 +590,18 @@ const Profile = () => {
                             {item.name.title}
                           </Text>
 
-                           {isEditing ? (
+                          {isEditing ? (
                             <TouchableOpacity
-                              onPress={() => tempDeleteItem(item,favourites,setFavourites)}
+                              onPress={() => tempDeleteItem(item, favourites, setFavourites)}
                               className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
                             >
                               <Text className="text-black font-poppingsBold">
                                 Remove
                               </Text>
                             </TouchableOpacity>
-                           ) : (
+                          ) : (
                             <TouchableOpacity
-                              onPress= {() => recipeSelected(item.id)}
+                              onPress={() => recipeSelected(item.id)}
                               className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
                             >
                               <Text className="text-black font-poppingsBold">
@@ -617,7 +637,7 @@ const Profile = () => {
               <>
                 <View className="pt-2">
                   {recents && recents.length > 0 ? (
-                    recents.reverse().slice(0,5).map((item, index) => (
+                    recents.reverse().slice(0, 5).map((item, index) => (
                       <View
                         key={index}
                         className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
@@ -630,16 +650,16 @@ const Profile = () => {
                           </Text>
                           {isEditing ? (
                             <TouchableOpacity
-                              onPress={() => tempDeleteItem(item,recents,setRecents)}
+                              onPress={() => tempDeleteItem(item, recents, setRecents)}
                               className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
                             >
                               <Text className="text-black font-poppingsBold">
                                 Remove
                               </Text>
                             </TouchableOpacity>
-                           ) : (
+                          ) : (
                             <TouchableOpacity
-                              onPress= {() => recipeSelected(item.id)}
+                              onPress={() => recipeSelected(item.id)}
                               className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
                             >
                               <Text className="text-black font-poppingsBold">
@@ -678,7 +698,7 @@ const Profile = () => {
             <View className="justify-center flex-row mt-7">
               <CustomButton
                 title="Save"
-                handlePress={()=>{
+                handlePress={() => {
                   Alert.alert(
                     "Confirm?",
                     "Do you want to save your profile data?",
@@ -690,7 +710,7 @@ const Profile = () => {
                       {
                         text: "No",
                         style: 'cancel'
-                      },  
+                      },
                     ]
                   );
                 }}
@@ -705,12 +725,12 @@ const Profile = () => {
               />
             </View>
           )}
-          
+
         </View>
       </ScrollView>
-      {selectedRecipe && ( 
-          <RecipeInfo selectedRecipe={selectedRecipe} visible={modalVisible} close={closeModal}></RecipeInfo>
-        )}
+      {selectedRecipe && (
+        <RecipeInfo selectedRecipe={selectedRecipe} visible={modalVisible} close={closeModal}></RecipeInfo>
+      )}
       <StatusBar backgroundColor="#161622" style="light"></StatusBar>
     </SafeAreaView>
   );

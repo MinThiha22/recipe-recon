@@ -10,8 +10,8 @@ import {
   SafeAreaView,
 } from "react-native";
 import axios from "axios";
-import { db, auth } from "../../lib/firebase.js";
-import { doc, setDoc, getDoc,getRecents } from "firebase/firestore";
+import { db, auth, getRecents } from "../../lib/firebase.js";
+import { doc, setDoc, getDoc} from "firebase/firestore";
 import FilterButton from "../../components/FilterButton.jsx";
 import RecipeInfo from '../../components/RecipeInfo.jsx';
 

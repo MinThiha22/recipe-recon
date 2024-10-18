@@ -40,11 +40,11 @@ const CommunityPage = () => {
                     <Text className="font-bold font-chewy text-xl">{item.title}</Text>
                     {item.imageUrl && (<Image className='w-80 h-80' source={{ uri: item.imageUrl }}></Image>)}
                 </View>
-                    <Text className="text-gray-600 mt-2">{item.body}</Text>
-                    <View className="flex-row items-center mt-2">
-                        <Image className="w-5 h-5 mr-1 rounded-full border-black border-1" source={{ uri: item.profilePicture }} />
-                        <Text className="text-gray-400 text-sm">{item.name}</Text>
-                    </View>
+                <Text className="text-gray-600 mt-2">{item.body}</Text>
+                <View className="flex-row items-center mt-2">
+                    <Image className="w-5 h-5 mr-1 rounded-full border-black border-1" source={{ uri: item.profilePicture }} />
+                    <Text className="text-gray-400 text-sm">{item.name}</Text>
+                </View>
                 <View>
                     <BookmarkButton selectedPost={item}></BookmarkButton>
                     <TouchableOpacity className="bg-primary p-3 rounded-full mt-4" onPress={() => toggleCommentsVisibility(item.id)}>
