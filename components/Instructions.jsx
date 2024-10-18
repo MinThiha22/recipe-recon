@@ -2,16 +2,12 @@ import React from "react";
 import {
   View,
   Text,
-  FlatList,
   TouchableOpacity,
   Modal,
-  SafeAreaView,
-  Alert,
   ScrollView,
   Image,
 } from "react-native";
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState } from "react";
 
 const Instructions = ({ recipe }) => {
   const [instructionsVisible, setInstructionsVisible] = useState(false);

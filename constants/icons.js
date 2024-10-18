@@ -6,9 +6,9 @@ import eye from "../assets/icons/show.png";
 import home from "../assets/icons/home.png";
 import profile from "../assets/icons/profile.png";
 import bookmark from "../assets/icons/bookmark.png";
-import search from "..//assets/icons/search.png";
-import plus from "..//assets/icons/plus.png";
-
+import search from "../assets/icons/search.png";
+import plus from "../assets/icons/plus.png";
+import community from "../assets/icons/community.png"
 export default {
     addIcon,
     close,
@@ -19,4 +19,5 @@ export default {
     bookmark,
     search,
     plus,
+    community
 };

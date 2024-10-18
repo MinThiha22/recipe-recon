@@ -15,12 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { icons } from "../../constants";
-import {
-  checkAuthState,
-  saveIngredients,
-  getIngredients,
-} from "../../lib/firebase";
-import { tryCatch } from "ramda";
+import { checkAuthState, saveIngredients } from "../../lib/firebase";
 
 const Home = () => {
   // State for holding the manually entered ingredient
@@ -30,10 +25,10 @@ const Home = () => {
 
   const [loading, setLoading] = useState(false);
 
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const [saving, setSaving] = useState(false);
-  
+
   // Handler function to add the entered ingredient to the list
   const imageRecognition = async (imageUri) => {
     setLoading(true);
@@ -54,23 +49,36 @@ const Home = () => {
         }
       );
 
-      const genericCategories = ['Food', 'Fruit', 'Whole food', 'Natural foods', 'Staple food', 'Vegetable', 'Ingredient','Recipe', 'Cuisine', 'Plant', 'Meat', 'Animal Product'
+      const genericCategories = [
+        "Food",
+        "Fruit",
+        "Whole food",
+        "Natural foods",
+        "Staple food",
+        "Vegetable",
+        "Ingredient",
+        "Recipe",
+        "Cuisine",
+        "Plant",
+        "Meat",
+        "Animal Product",
       ];
 
       // Filter the response to exclude generic categories
-      const filteredData = response.data.data.filter(item => !genericCategories.includes(item.description));
+      const filteredData = response.data.data.filter(
+        (item) => !genericCategories.includes(item.description)
+      );
 
       console.log(filteredData);
       if (filteredData.length > 0) {
-        const options = filteredData.map(item => item.description);
-        const scores = filteredData.map(item => item.score)
-        showSelectionAlert(options,scores);
-      } else { 
-        setError('No specific ingredients found.');
+        const options = filteredData.map((item) => item.description);
+        const scores = filteredData.map((item) => item.score);
+        showSelectionAlert(options, scores);
+      } else {
+        setError("No specific ingredients found.");
       }
 
       handleAddIngredient;
-
     } catch (err) {
       console.error("Error fetching recognition response: ", err);
       setError("Failed to fetch recipes");
@@ -79,27 +87,25 @@ const Home = () => {
     }
   };
 
-
-  const showSelectionAlert = (options,scores) => {
+  const showSelectionAlert = (options, scores) => {
     Alert.alert(
-      'Image Results with Scores',
-      'Please choose the correct ingredient',
+      "Image Results with Scores",
+      "Please choose the correct ingredient",
       [
         ...options.map((option, index) => ({
-          text: `${option} - ${(scores[index]*100).toFixed(2)}%`,
+          text: `${option} - ${(scores[index] * 100).toFixed(2)}%`,
           onPress: () => {
-            setIngredient(option); 
+            setIngredient(option);
           },
         })),
         {
-          text: 'Try Again',
-          style: 'cancel'
+          text: "Try Again",
+          style: "cancel",
         },
       ],
       { cancelable: true }
     );
   };
-  
 
   const openCamera = async () => {
     try {
@@ -196,8 +202,7 @@ const Home = () => {
   };
 
   const handleClearInput = () => {
-
-    setIngredient('');
+    setIngredient("");
   };
 
   return (
@@ -253,8 +258,16 @@ const Home = () => {
           </View>
 
           <View className="w-[80%]">
-            {loading && <Text className="text-secondary font-poppinsBold mt-3 mb-3 text-lg text-center">Loading... Analysing image...</Text>}
-            {error && <Text className="text-red-500 mb-4 font-poppinsBold">{error}</Text>}
+            {loading && (
+              <Text className="text-secondary font-poppinsBold mt-3 mb-3 text-lg text-center">
+                Loading... Analysing image...
+              </Text>
+            )}
+            {error && (
+              <Text className="text-red-500 mb-4 font-poppinsBold">
+                {error}
+              </Text>
+            )}
           </View>
 
           {/* Display the added ingredients */}
