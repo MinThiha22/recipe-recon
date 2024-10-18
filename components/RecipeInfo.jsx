@@ -31,7 +31,7 @@ const RecipeInfo = ({ selectedRecipe, visible, close }) => {
             className="bg-blue-500 p-3 rounded-full mt-4"
             onPress={close}
           >
-            <Text className="text-white font-bold text-center">Hide Modal</Text>
+            <Text className="text-white font-bold text-center">Hide</Text>
           </TouchableOpacity>
           <Instructions recipe={selectedRecipe}></Instructions>
           <FavouriteButton selectedRecipe={selectedRecipe} />

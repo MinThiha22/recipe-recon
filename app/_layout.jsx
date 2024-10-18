@@ -9,6 +9,7 @@ SplashScreen.preventAutoHideAsync();
 LogBox.ignoreLogs([
   "TNodeChildrenRenderer: Support for defaultProps will be removed from function components in a future major release.",
   "MemoizedTNodeRenderer: Support for defaultProps will be removed from memo components in a future major release.",
+  "TRenderEngineProvider: Support for defaultProps will be removed from function components in a future major release.",
 ]);
 const RootLayout = () => {
   const [fontsLoaded, error] = useFonts({

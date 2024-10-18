@@ -255,6 +255,7 @@ const Profile = () => {
 
   const editProfile = async () => {
     if (isLoading) return;
+    setRecents(recents.reverse());
     setIsEditing(true);
   };
 
@@ -319,7 +320,7 @@ const Profile = () => {
     setIsEditing(false);
     setIngredients(userData.savedIngredients);
     setFavourites(userData.favourites);
-    setRecents(userData.recents);
+    setRecents(recents.reverse());
   };
 
   // Get specific recipe information from server when recipe is pressed
@@ -346,6 +347,7 @@ const Profile = () => {
   const closeModal = () => {
     setModalVisible(false);
     setSelectedRecipe(null);
+    getDynamicData();
   };
 
   return (
@@ -410,6 +412,52 @@ const Profile = () => {
               Email: {userData.email}
             </Text>
           </View>
+          {!isEditing ? (
+            <View className="justify-center flex-row mt-4">
+              <CustomButton
+                title="Edit Profile"
+                handlePress={editProfile}
+                containerStyles={"w-[30%]"}
+                isLoading={isSumbitting}
+              />
+              <CustomButton
+                title="Log Out"
+                handlePress={logOut}
+                containerStyles={"w-[30%] ml-2"}
+                isLoading={isSumbitting}
+              />
+            </View>
+          ) : (
+            <View className="justify-center flex-row mt-4">
+              <CustomButton
+                title="Save"
+                handlePress={() => {
+                  Alert.alert(
+                    "Confirm?",
+                    "Do you want to save your profile data?",
+                    [
+                      {
+                        text: "Yes",
+                        onPress: saveChanges,
+                      },
+                      {
+                        text: "No",
+                        style: "cancel",
+                      },
+                    ]
+                  );
+                }}
+                containerStyles={"bg-red-400 w-[30%]"}
+                isLoading={isSumbitting}
+              />
+              <CustomButton
+                title="Cancel"
+                handlePress={cancelChanges}
+                containerStyles={"bg-red-400 w-[30%] ml-2"}
+                isLoading={isSumbitting}
+              />
+            </View>
+          )}
           <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
 
           <View className="items-center">
@@ -618,52 +666,6 @@ const Profile = () => {
               </>
             )}
           </View>
-          {!isEditing ? (
-            <View className="justify-center flex-row mt-7">
-              <CustomButton
-                title="Edit Profile"
-                handlePress={editProfile}
-                containerStyles={"w-[30%]"}
-                isLoading={isSumbitting}
-              />
-              <CustomButton
-                title="Log Out"
-                handlePress={logOut}
-                containerStyles={"w-[30%] ml-2"}
-                isLoading={isSumbitting}
-              />
-            </View>
-          ) : (
-            <View className="justify-center flex-row mt-7">
-              <CustomButton
-                title="Save"
-                handlePress={() => {
-                  Alert.alert(
-                    "Confirm?",
-                    "Do you want to save your profile data?",
-                    [
-                      {
-                        text: "Yes",
-                        onPress: saveChanges,
-                      },
-                      {
-                        text: "No",
-                        style: "cancel",
-                      },
-                    ]
-                  );
-                }}
-                containerStyles={"bg-red-400 w-[30%]"}
-                isLoading={isSumbitting}
-              />
-              <CustomButton
-                title="Cancel"
-                handlePress={cancelChanges}
-                containerStyles={"bg-red-400 w-[30%] ml-2"}
-                isLoading={isSumbitting}
-              />
-            </View>
-          )}
         </View>
       </ScrollView>
       {selectedRecipe && (

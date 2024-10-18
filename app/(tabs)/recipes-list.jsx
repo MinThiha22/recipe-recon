@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -11,7 +12,7 @@ import {
 import axios from "axios";
 import { db, auth } from "../../lib/firebase.js";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { getRecents } from "../../lib/firebase.js";
+import { getRecents, checkAuthState } from "../../lib/firebase.js";
 import FilterButton from "../../components/FilterButton.jsx";
 import RecipeInfo from "../../components/RecipeInfo.jsx";
 
@@ -167,9 +168,14 @@ const RecipeList = () => {
 
     if (currentUser) {
       fetchIngredients(currentUser.uid);
-      fetchRecents(currentUser.uid);
     }
   }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchRecents();
+      return () => {};
+    }, [])
+  );
 
   //get ingredients from firebase
   const fetchIngredients = async (userId) => {
@@ -193,7 +199,12 @@ const RecipeList = () => {
   };
 
   // Get recents from Firebase
-  const fetchRecents = async (userId) => {
+  const fetchRecents = async () => {
+    const user = await checkAuthState();
+    if (!user) {
+      throw new Error("User is not authenticated");
+    }
+    const userId = user.uid;
     const recents = await getRecents(userId).catch(() => []);
     setRecentList(recents);
   };
