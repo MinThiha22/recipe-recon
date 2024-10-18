@@ -3,7 +3,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import axios from "axios";
 import multer from "multer";
-import FormData from "form-data";
 import vision from "@google-cloud/vision"
 
 dotenv.config();
