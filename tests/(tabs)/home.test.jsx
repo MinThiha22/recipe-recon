@@ -49,7 +49,7 @@ describe("<Home />", () => {
     });
 
     // Simulate removing the first ingredient (Tomato)
-    const removeButton = getByTestId("removeButton-0"); // Use testID for the first button
+    const removeButton = getByTestId("removeButton-0");
     await act(async () => {
       fireEvent.press(removeButton);
     });
@@ -75,5 +75,30 @@ describe("<Home />", () => {
 
     // Check if the input field is cleared
     expect(input.props.value).toBe("");
+  });
+
+  // Test 4: handleClearAll
+  it("clears all ingredients when handleClearAll is called", async () => {
+    const { getByPlaceholderText, getByText } = render(<Home />);
+
+    // Add ingredients
+    const input = getByPlaceholderText("Type ingredient here...");
+    fireEvent.changeText(input, "Tomato");
+    await act(async () => {
+      fireEvent.press(getByText("Add Ingredient"));
+    });
+    fireEvent.changeText(input, "Cheese");
+    await act(async () => {
+      fireEvent.press(getByText("Add Ingredient"));
+    });
+
+    // Simulate pressing Clear All button
+    const clearAllButton = getByText("Clear All");
+    await act(async () => {
+      fireEvent.press(clearAllButton);
+    });
+
+    // Check if the list is cleared
+    expect(getByText("No ingredients added yet.")).toBeTruthy();
   });
 });
