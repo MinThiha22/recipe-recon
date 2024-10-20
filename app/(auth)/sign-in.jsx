@@ -34,7 +34,7 @@ const SignIn = () => {
       // reroute to home after sign-in
       router.replace('/home')
     } catch (error) {
-      Alert.alert('Error',error.message)
+      Alert.alert('Invalid Email or Password')
     } finally {
       setIsSumbitting(false);
     }

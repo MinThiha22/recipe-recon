@@ -1,12 +1,21 @@
-import { Alert, View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
+import {
+  Alert,
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Modal,
+} from "react-native";
 import { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import CustomButton from "../../components/CustomButton";
 import { useGlobalContext } from "../../context/GlobalProvider";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from "@react-navigation/native";
 import {
   logout,
+  updateUsername,
   getCurrentUserData,
   uploadProfilePicture,
   getProfilePicture,
@@ -15,24 +24,45 @@ import {
   deleteIngredient,
   deleteAllIngredients,
   getFavourites,
+  deleteFavourite,
   getRecents,
+  deleteRecent,
+  getBookmarks,
+  deleteBookmark,
 } from "../../lib/firebase";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
 import { images, icons } from "../../constants";
+import FormField from "../../components/FormField";
+import RecipeInfo from "../../components/RecipeInfo.jsx";
+import axios from "axios";
+import Comments from "../../components/Comments";
 
 const Profile = () => {
   const [isSumbitting, setIsSumbitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const { setUser, setIsLoggedIn } = useGlobalContext();
+  const [newUsername, setNewUsername] = useState("");
   const [userData, setUserData] = useState({
     username: "",
     email: "",
     profilePicture: null,
     savedIngredients: [],
     favourites: [],
+    recents: [],
+    bookmarks: [],
   });
   const [isLoading, setLoading] = useState(false);
+  const [isLoadingInfo, setLoadingInfo] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [ingredients, setIngredients] = useState([]);
+  const [favourites, setFavourites] = useState([]);
+  const [recents, setRecents] = useState([]);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [commentsVisible, setCommentsVisible] = useState(null);
+  const [favouriteToggled, setFavouriteToggled] = useState(false);
 
   // Log out current user when log out button is pressed
   const logOut = async () => {
@@ -49,9 +79,10 @@ const Profile = () => {
     }
   };
 
-  // Get current user data including username, email, profilePicture, saveIngredients and favourites
+  // Get current user data including username, email, profilePicture.
   const getData = async () => {
-    setLoading(true);
+    if (isEditing) return;
+    setLoadingInfo(true);
     try {
       const user = await checkAuthState();
       if (!user) {
@@ -60,11 +91,44 @@ const Profile = () => {
       const userId = user.uid;
       const { username, email } = await getCurrentUserData();
       const profilePicture = await getProfilePicture(userId);
+      setUserData({ username, email, profilePicture });
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setLoadingInfo(false);
+    }
+  };
+
+  // Get Dynamic Data savedIngredients favourites, and recents recipes and bookmarks
+  const getDynamicData = async () => {
+    if (isEditing) return;
+    setLoading(true);
+    try {
+      const user = await checkAuthState();
+      if (!user) {
+        throw new Error("User is not authenticated");
+      }
+      const userId = user.uid;
 
       const savedIngredients = await getIngredients(userId).catch(() => []);
       const favourites = await getFavourites(userId).catch(() => []);
       const recents = await getRecents(userId).catch(() => []);
-      setUserData({ username, email, profilePicture, savedIngredients, favourites, recents });
+      const bookmarks = await getBookmarks(userId).catch(() => []);
+
+      setUserData((prevData) => ({
+        ...prevData,
+        savedIngredients,
+        favourites,
+        recents,
+        bookmarks,
+      }));
+
+      setUserData((prevData) => ({
+        ...prevData,
+        savedIngredients,
+        favourites,
+        recents,
+      }));
     } catch (error) {
       console.log(error.message);
     } finally {
@@ -74,13 +138,23 @@ const Profile = () => {
 
   useFocusEffect(
     useCallback(() => {
-      getData();
+      getDynamicData();
+      return () => {
+        setIsEditing(false);
+      };
     }, [])
   );
 
   useEffect(() => {
     getData();
   }, []);
+
+  useEffect(() => {
+    setIngredients(userData.savedIngredients);
+    setFavourites(userData.favourites);
+    setRecents(userData.recents);
+    setBookmarks(userData.bookmarks);
+  }, [userData]);
 
   // Alert box to choose picture input
   const pickImage = async () => {
@@ -187,8 +261,23 @@ const Profile = () => {
     }
   };
 
-  // delete one ingredient from saved ingredients
-  const deleteOne = async (ingredient) => {
+  const tempDeleteItem = (item, array, setState) => {
+    setState((prevArray) =>
+      prevArray.filter((arrayItem) => arrayItem !== item)
+    );
+  };
+
+  const tempDeleteAll = () => {
+    setIngredients([]);
+  };
+
+  const editProfile = async () => {
+    if (isLoading) return;
+    setRecents(recents.reverse());
+    setIsEditing(true);
+  };
+
+  const saveChanges = async () => {
     setIsSumbitting(true);
     try {
       const user = await checkAuthState();
@@ -196,37 +285,106 @@ const Profile = () => {
         throw new Error("User is not authenticated");
       }
       const userId = user.uid;
-      await deleteIngredient(ingredient, userId);
+
+      if (newUsername !== "") {
+        await updateUsername(newUsername);
+      }
+
+      if (ingredients.length === 0) {
+        await deleteAllIngredients(userId);
+      } else {
+        const ingredientsToDelete = userData.savedIngredients.filter(
+          (ingredient) => !ingredients.includes(ingredient)
+        );
+
+        for (const ingredient of ingredientsToDelete) {
+          await deleteIngredient(ingredient, userId);
+        }
+      }
+
+      const favouritesToDelete = userData.favourites.filter(
+        (fav) => !favourites.includes(fav)
+      );
+      for (const fav of favouritesToDelete) {
+        await deleteFavourite(fav, userId);
+      }
+
+      const recentsToDelete = userData.recents.filter(
+        (recent) => !recents.includes(recent)
+      );
+
+      for (const recent of recentsToDelete) {
+        await deleteRecent(recent, userId);
+      }
+
+      const bookmarksToDelete = userData.bookmarks.filter(
+        (recent) => !bookmarks.includes(bookmarks)
+      );
+
+      for (const bookmark of bookmarksToDelete) {
+        await deleteBookmark(bookmark, userId);
+      }
+
       setUserData((prevData) => ({
         ...prevData,
-        savedIngredients: prevData.savedIngredients.filter(
-          (item) => item !== ingredient
-        ),
+        username: newUsername !== "" ? newUsername : prevData.username,
+        savedIngredients: ingredients,
+        favourites: favourites,
+        recents: recents,
+        bookmarks: bookmarks,
       }));
+
+      Alert.alert("Success", "Changes saved successfully!");
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
       setIsSumbitting(false);
+      setIsEditing(false);
     }
   };
 
-  // delete all ingredients
-  const deleteAll = async () => {
-    setIsSumbitting(true);
+  const cancelChanges = async () => {
+    setIsEditing(false);
+    setIngredients(userData.savedIngredients);
+    setFavourites(userData.favourites);
+
+    setRecents(recents.reverse());
+    setBookmarks(userData.bookmarks);
+  };
+
+  // Get specific recipe information from server when recipe is pressed
+  const recipeSelected = async (id) => {
     try {
-      const user = await checkAuthState();
-      if (!user) {
-        throw new Error("User is not authenticated");
-      }
-      const userId = user.uid;
-      await deleteAllIngredients(userId);
-      setUserData((prevData) => ({ ...prevData, savedIngredients: [] }));
-      Alert.alert("Success", "All ingredients deleted successfully!");
+      const response = await axios.get(
+        `https://recipe-recon.onrender.com/api/recipeInfo`,
+        {
+          params: { query: id },
+        }
+      );
+      const recipeInfo = response.data;
+      setSelectedRecipe(recipeInfo);
+      setRecents(userData.recents);
+      setModalVisible(true);
     } catch (error) {
-      Alert.alert("Error", error.message);
+      console.log(error.message);
     } finally {
-      setIsSumbitting(false);
+      setLoading(false);
     }
+  };
+
+  // Close modal
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedRecipe(null);
+    if (favouriteToggled) {
+      getDynamicData();
+      setFavouriteToggled(false); // Reset the flag
+    }
+  };
+
+  //toggle comments visibility
+  const toggleCommentsVisibility = (postId) => {
+    setCommentsVisible((prev) => (prev === postId ? null : postId));
   };
 
   return (
@@ -236,15 +394,26 @@ const Profile = () => {
           <Text className="text-3xl mt-5 text-title font-chewy">
             Your Profile
           </Text>
-          {isLoading && (
+          {isLoadingInfo && (
             <Text className="text-lg mt-3 text-secondary font-poppinsBold">
               Loading...Please wait...
             </Text>
           )}
-          {!isLoading && (
+          {!isLoadingInfo && !isEditing && (
             <Text className="text-lg mt-3 text-secondary font-poppinsBold">
               Hello {userData.username}
             </Text>
+          )}
+          {isEditing && (
+            <FormField
+              title=""
+              value={newUsername}
+              placeholder={userData.username}
+              handleChangeText={(text) => {
+                setNewUsername(text);
+              }}
+              otherStyles="w-[30%]"
+            />
           )}
 
           <View className="relative mt-3">
@@ -265,10 +434,12 @@ const Profile = () => {
               onPress={pickImage}
               className="absolute right-0 bottom-0 p-2 bg-secondary rounded-full"
             >
-              <Image source={icons.addIcon} className="w-[15px] h-[15px]" ></Image>
+              <Image
+                source={icons.addIcon}
+                className="w-[15px] h-[15px]"
+              ></Image>
             </TouchableOpacity>
           </View>
-
 
           <View className="flex-col items-center mt-5">
             <Text className="text-lg font-poppinsBold text-secondary">
@@ -278,11 +449,138 @@ const Profile = () => {
               Email: {userData.email}
             </Text>
           </View>
+          {!isEditing ? (
+            <View className="justify-center flex-row mt-4">
+              <CustomButton
+                title="Edit Profile"
+                handlePress={editProfile}
+                containerStyles={"w-[30%]"}
+                isLoading={isSumbitting}
+              />
+              <CustomButton
+                title="Log Out"
+                handlePress={logOut}
+                containerStyles={"w-[30%] ml-2"}
+                isLoading={isSumbitting}
+              />
+            </View>
+          ) : (
+            <View className="justify-center flex-row mt-4">
+              <CustomButton
+                title="Save"
+                handlePress={() => {
+                  Alert.alert(
+                    "Confirm?",
+                    "Do you want to save your profile data?",
+                    [
+                      {
+                        text: "Yes",
+                        onPress: saveChanges,
+                      },
+                      {
+                        text: "No",
+                        style: "cancel",
+                      },
+                    ]
+                  );
+                }}
+                containerStyles={"bg-red-400 w-[30%]"}
+                isLoading={isSumbitting}
+              />
+              <CustomButton
+                title="Cancel"
+                handlePress={cancelChanges}
+                containerStyles={"bg-red-400 w-[30%] ml-2"}
+                isLoading={isSumbitting}
+              />
+            </View>
+          )}
           <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
 
           <View className="items-center">
             <Text className="text-lg font-poppinsBold text-secondary">
               Saved ingredients
+            </Text>
+
+            {isLoading && (
+              <Text className=" text-secondary font-poppingsRegular">
+                Loading...Please wait...
+              </Text>
+            )}
+            {!isLoading && (
+              <>
+                <View className="pt-2">
+                  {ingredients && ingredients.length > 0 ? (
+                    ingredients.map((item, index) =>
+                      isEditing ? (
+                        <View
+                          key={index}
+                          className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
+                        >
+                          <Text className="font-poppingsRegular font-bold text-secondary">
+                            {item}
+                          </Text>
+                          <TouchableOpacity
+                            onPress={() =>
+                              tempDeleteItem(item, ingredients, setIngredients)
+                            }
+                          >
+                            <Image source={icons.close} className="w-4 h-4" />
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <View
+                          key={index}
+                          className="flex-row justify-between items-center p-2 mb-1 rounded-md w-[70%]"
+                        >
+                          <Text className="font-poppingsBold text-lg font-bold text-secondary">
+                            {item}
+                          </Text>
+                        </View>
+                      )
+                    )
+                  ) : (
+                    <Text className="font-poppingsRegular text-secondary">
+                      No saved ingredients
+                    </Text>
+                  )}
+                  {isEditing && ingredients && ingredients.length > 0 && (
+                    <View className="items-center">
+                      <TouchableOpacity
+                        onPress={() => {
+                          Alert.alert(
+                            "Confirm?",
+                            "Are you sure you want to delete all saved ingredients",
+                            [
+                              {
+                                text: "Yes",
+                                onPress: tempDeleteAll,
+                              },
+                              {
+                                text: "No",
+                                style: "cancel",
+                              },
+                            ]
+                          );
+                        }}
+                        className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[40%]"
+                      >
+                        <Text className="text-black font-poppingsBold">
+                          Delete All
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              </>
+            )}
+          </View>
+
+          <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
+
+          <View className="items-center">
+            <Text className="text-lg font-poppinsBold text-secondary">
+              Bookmarks
             </Text>
             {isLoading && (
               <Text className=" text-secondary font-poppingsRegular">
@@ -292,44 +590,81 @@ const Profile = () => {
             {!isLoading && (
               <>
                 <View className="pt-2">
-                  {userData.savedIngredients &&
-                    userData.savedIngredients.length > 0 ? (
-                    userData.savedIngredients.map((item, index) => (
+                  {bookmarks && bookmarks.length > 0 ? (
+                    bookmarks.reverse().map((item, index) => (
                       <View
                         key={index}
-                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
+                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[80%] mx-auto"
                       >
-                        <Text className="font-poppingsRegular font-bold text-secondary">
-                          {item}
-                        </Text>
-                        <TouchableOpacity onPress={() => deleteOne(item)}>
-                          <Image source={icons.close} className="w-4 h-4" />
-                        </TouchableOpacity>
+                        <View className="flex-col gap-1 items-center justify-center">
+                          <Text className="font-poppinsRegular text-black text-lg">
+                            {item.name.title}
+                          </Text>
+                          <Image
+                            className="w-60 h-60"
+                            source={{ uri: item.name.imageUrl }}
+                          />
+                          <Text className="text-gray-600 mt-2">
+                            {item.name.body}
+                          </Text>
+
+                          {isEditing ? (
+                            <TouchableOpacity
+                              onPress={() =>
+                                tempDeleteItem(item, bookmarks, setBookmarks)
+                              }
+                              className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
+                            >
+                              <Text className="text-black font-poppingsBold">
+                                Remove
+                              </Text>
+                            </TouchableOpacity>
+                          ) : (
+                            <View>
+                              <TouchableOpacity
+                                className="bg-primary p-3 rounded-full mt-4"
+                                onPress={() =>
+                                  toggleCommentsVisibility(item.id)
+                                }
+                              >
+                                <Text className="text-white font-bold text-center">
+                                  View Comments
+                                </Text>
+                              </TouchableOpacity>
+                              <Modal
+                                animationType="slide"
+                                transparent={true}
+                                visible={commentsVisible === item.name.postId}
+                                onRequestClose={() => setCommentsVisible(null)}
+                              >
+                                <View className="flex-1 m-2 justify-end">
+                                  <View className="h-3/4 bg-white rounded-lg shadow pl-4 pr-4">
+                                    <TouchableOpacity
+                                      className="bg-primary p-3 rounded-full mt-4"
+                                      onPress={() => setCommentsVisible(null)}
+                                    >
+                                      <Text className="text-white font-bold text-center">
+                                        Hide Comments
+                                      </Text>
+                                    </TouchableOpacity>
+                                    <Comments postId={item.name.postId} />
+                                  </View>
+                                </View>
+                              </Modal>
+                            </View>
+                          )}
+                        </View>
                       </View>
                     ))
                   ) : (
                     <Text className="font-poppingsRegular text-secondary">
-                      No saved ingredients
+                      No bookmarked recipes
                     </Text>
                   )}
-                  {userData.savedIngredients &&
-                    userData.savedIngredients.length > 0 && (
-                      <View className="items-center">
-                        <TouchableOpacity
-                          onPress={deleteAll}
-                          className="bg-red-500 h-[30px] rounded-xl justify-center items-center w-[40%]"
-                        >
-                          <Text className="text-secondary font-poppingsRegular">
-                            Delete All
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
                 </View>
               </>
             )}
           </View>
-
           <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
 
           <View className="items-center">
@@ -344,18 +679,42 @@ const Profile = () => {
             {!isLoading && (
               <>
                 <View className="pt-2">
-                  {userData.favourites && userData.favourites.length > 0 ? (
-                    userData.favourites.map((item, index) => (
+                  {favourites && favourites.length > 0 ? (
+                    favourites.map((item, index) => (
                       <View
                         key={index}
-                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
+                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[80%] mx-auto"
                       >
-
-                        <View className="flex-col items-center justify-center">
-                          <Image className="w-60 h-60" source={{ uri: item.name.image }} />
+                        <View className="flex-col gap-1 items-center justify-center">
+                          <Image
+                            className="w-60 h-60"
+                            source={{ uri: item.name.image }}
+                          />
                           <Text className="font-poppinsRegular text-black text-lg">
                             {item.name.title}
                           </Text>
+
+                          {isEditing ? (
+                            <TouchableOpacity
+                              onPress={() =>
+                                tempDeleteItem(item, favourites, setFavourites)
+                              }
+                              className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
+                            >
+                              <Text className="text-black font-poppingsBold">
+                                Remove
+                              </Text>
+                            </TouchableOpacity>
+                          ) : (
+                            <TouchableOpacity
+                              onPress={() => recipeSelected(item.id)}
+                              className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
+                            >
+                              <Text className="text-black font-poppingsBold">
+                                Detail
+                              </Text>
+                            </TouchableOpacity>
+                          )}
                         </View>
                       </View>
                     ))
@@ -383,40 +742,67 @@ const Profile = () => {
             {!isLoading && (
               <>
                 <View className="pt-2">
-                  {userData.recents && userData.recents.length > 0 ? (
-                    userData.recents.reverse().slice(0,5).map((item, index) => (
-                      <View
-                        key={index}
-                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
-                      >
-
-                        <View className="flex-col items-center justify-center">
-                          <Image className="w-60 h-60" source={{ uri: item.name.image }} />
-                          <Text className="font-poppinsRegular text-black text-lg">
-                            {item.name.title}
-                          </Text>
+                  {recents && recents.length > 0 ? (
+                    recents
+                      .reverse()
+                      .slice(0, 5)
+                      .map((item, index) => (
+                        <View
+                          key={index}
+                          className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
+                        >
+                          <View className="flex-col items-center justify-center">
+                            <Image
+                              className="w-60 h-60"
+                              source={{ uri: item.name.image }}
+                            />
+                            <Text className="font-poppinsRegular text-black text-lg">
+                              {item.name.title}
+                            </Text>
+                            {isEditing ? (
+                              <TouchableOpacity
+                                onPress={() =>
+                                  tempDeleteItem(item, recents, setRecents)
+                                }
+                                className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
+                              >
+                                <Text className="text-black font-poppingsBold">
+                                  Remove
+                                </Text>
+                              </TouchableOpacity>
+                            ) : (
+                              <TouchableOpacity
+                                onPress={() => recipeSelected(item.id)}
+                                className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
+                              >
+                                <Text className="text-black font-poppingsBold">
+                                  Detail
+                                </Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
                         </View>
-                      </View>
-                    ))
+                      ))
                   ) : (
                     <Text className="font-poppingsRegular text-secondary">
-                      No favourite recipes
+                      No Recent recipes
                     </Text>
                   )}
                 </View>
               </>
             )}
           </View>
-
-
-          <CustomButton
-            title="Log Out"
-            handlePress={logOut}
-            containerStyles={"mt-7 w-[30%]"}
-            isLoading={isSumbitting}
-          />
         </View>
       </ScrollView>
+      {selectedRecipe && (
+        <RecipeInfo
+          selectedRecipe={selectedRecipe}
+          visible={modalVisible}
+          close={closeModal}
+          favouriteToggled={favouriteToggled} // Pass the state
+          setFavouriteToggled={setFavouriteToggled} // Pass the setter function
+        ></RecipeInfo>
+      )}
       <StatusBar backgroundColor="#161622" style="light"></StatusBar>
     </SafeAreaView>
   );

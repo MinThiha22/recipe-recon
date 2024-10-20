@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import React from "react";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
 
 export const ShoppingList = ({ list, deleteItem }) => {
   if (!list || !list.length)

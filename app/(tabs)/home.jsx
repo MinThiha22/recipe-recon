@@ -15,12 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { icons } from "../../constants";
-import {
-  checkAuthState,
-  saveIngredients,
-  getIngredients,
-} from "../../lib/firebase";
-import { tryCatch } from "ramda";
+import { checkAuthState, saveIngredients } from "../../lib/firebase";
 
 const Home = () => {
   // State for holding the manually entered ingredient
@@ -29,8 +24,9 @@ const Home = () => {
   const [ingredientsList, setIngredientsList] = useState([]);
 
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState("");
-  const [response, setResponse] = useState("");
+
   const [saving, setSaving] = useState(false);
 
   // Handler function to add the entered ingredient to the list
@@ -44,7 +40,7 @@ const Home = () => {
         name: "image.jpg",
       });
       const response = await axios.post(
-        `https://roughy-polite-wholly.ngrok-free.app/api/imageRecognition`,
+        `https://recipe-recon.onrender.com/api/imageRecognition`,
         formData,
         {
           headers: {
@@ -52,8 +48,36 @@ const Home = () => {
           },
         }
       );
-      setResponse(response.data);
-      setIngredient(response.data.category);
+
+      const genericCategories = [
+        "Food",
+        "Fruit",
+        "Whole food",
+        "Natural foods",
+        "Staple food",
+        "Vegetable",
+        "Ingredient",
+        "Recipe",
+        "Cuisine",
+        "Plant",
+        "Meat",
+        "Animal Product",
+      ];
+
+      // Filter the response to exclude generic categories
+      const filteredData = response.data.data.filter(
+        (item) => !genericCategories.includes(item.description)
+      );
+
+      console.log(filteredData);
+      if (filteredData.length > 0) {
+        const options = filteredData.map((item) => item.description);
+        const scores = filteredData.map((item) => item.score);
+        showSelectionAlert(options, scores);
+      } else {
+        setError("No specific ingredients found.");
+      }
+
       handleAddIngredient;
     } catch (err) {
       console.error("Error fetching recognition response: ", err);
@@ -61,6 +85,26 @@ const Home = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const showSelectionAlert = (options, scores) => {
+    Alert.alert(
+      "Image Results with Scores",
+      "Please choose the correct ingredient",
+      [
+        ...options.map((option, index) => ({
+          text: `${option} - ${(scores[index] * 100).toFixed(2)}%`,
+          onPress: () => {
+            setIngredient(option);
+          },
+        })),
+        {
+          text: "Try Again",
+          style: "cancel",
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const openCamera = async () => {
@@ -90,12 +134,36 @@ const Home = () => {
       );
     }
   };
+  const openPhotos = async () => {
+    try {
+      let result = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (result.status !== "granted") {
+        Alert.alert(
+          "Permission denied",
+          "Sorry, we need permission to select picture!"
+        );
+        return;
+      }
+      let pickerResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+      if (!pickerResult.canceled) {
+        const imageUri = pickerResult.assets[0].uri;
+        await imageRecognition(imageUri);
+      }
+    } catch (error) {
+      Alert.alert(error.message);
+    }
+  };
 
+  // Handler function to add an ingredient to the list
   const handleAddIngredient = () => {
     if (ingredient.trim()) {
       setIngredientsList([...ingredientsList, ingredient]);
       setIngredient("");
-      setResponse("");
     }
   };
 
@@ -135,7 +203,6 @@ const Home = () => {
 
   const handleClearInput = () => {
     setIngredient("");
-    setResponse("");
   };
 
   return (
@@ -174,6 +241,7 @@ const Home = () => {
               <TouchableOpacity
                 onPress={handleClearInput}
                 testID="clearInputButton"
+                accessibilityLabel="Clear input"
               >
                 <Image
                   source={icons.close}
@@ -191,21 +259,14 @@ const Home = () => {
 
           <View className="w-[80%]">
             {loading && (
-              <Text className="text-secondary font-poppinsBold mt-3 mb-3 text-lg">
-                Loading...Analysing image....
+              <Text className="text-secondary font-poppinsBold mt-3 mb-3 text-lg text-center">
+                Loading... Analysing image...
               </Text>
             )}
-            {error && <Text className="text-red-500 mb-4">{error}</Text>}
-            {!loading && response && (
-              <>
-                <Text className="text-secondary font-poppinsRegular mt-3 mb-1">
-                  Item found with {(response.probability * 100).toFixed(2)}%
-                  probability.
-                </Text>
-                <Text className="text-secondary font-poppinsRegular">
-                  If item is not correct, please try again!
-                </Text>
-              </>
+            {error && (
+              <Text className="text-red-500 mb-4 font-poppinsBold">
+                {error}
+              </Text>
             )}
           </View>
 
@@ -228,6 +289,7 @@ const Home = () => {
                   <TouchableOpacity
                     onPress={() => handleRemoveIngredient(index)}
                     testID={`removeButton-${index}`}
+                    accessibilityLabel={`Remove ${ingredient}`}
                   >
                     <Image
                       source={icons.close}
@@ -246,6 +308,7 @@ const Home = () => {
       <View className="flex-row justify-between bg-primary p-4 absolute bottom-0 w-full">
         <TouchableOpacity
           onPress={handleClearAll}
+          accessibilityLabel="Clear All"
           className="w-[50%] justify-center items-center"
         >
           <Text className="text-white text-lg">Clear All</Text>

@@ -1,19 +1,20 @@
 # Recipe Recon
 
 ## Introduction
-In today's fast-paced world, we often find ourselves struggling to balance our love for food with our busy lifestyles. That's why we decided to develop a revolutionary solution: an image-base cooking wizard software designed specifically for inexperienced home cooks. 
 
-Recipe Recon is a mobile application that generates recipes based on the ingredients users have in their fridge or pantry. Using a camera to capture ingredient images, the app will provide users with recipe suggestions based on the ingredient they have. 
+In today's fast-paced world, we often find ourselves struggling to balance our love for food with our busy lifestyles. That's why we decided to develop a revolutionary solution: an image-base cooking wizard software designed specifically for inexperienced home cooks.
+
+Recipe Recon is a mobile application that generates recipes based on the ingredients users have in their fridge or pantry. Using a camera to capture ingredient images, the app will provide users with recipe suggestions based on the ingredient they have.
 
 Simply scan the ingredients you have on hand, and our app will suggest mouth-watering recipes and provide step-by-step cooking guidance. Say goodbye to kitchen stress and hello to a world of flavours!
 
 ## Table of Contents
+
 - [Features](#features)
 - [Installation](#installation)
-- [Usage](#usage)
+- [API Usage](#api-usage)
 - [Team](#team)
 - [Contact](#contact)
-
 
 ## Features
 
@@ -25,20 +26,35 @@ Simply scan the ingredients you have on hand, and our app will suggest mouth-wat
 - **Community** - Users can share their favourite recipes, rate and review other users’ recipes, and participate in a community forum for cooking tips and advice.
 
 ## Installation
-Clone the repository on your local
+
+1. Set up an iOS device with Expo Go.  
+   Scan the QR code to download the app from the App Store, or visit the Expo Go page on the [App Store](https://apps.apple.com/us/app/expo-go/id982107779).  
+   <img src="./assets/images/qr.png" alt="QR Code" width="200" height="200" />
+2. Download [release branch](https://github.com/MinThiha22/recipe-recon/archive/refs/heads/main.zip) and unzip the folder.
+
+3. Run `npm install` from terminal in downloaded folder to get all the required packages.
+
 ```bash
-   git clone https://github.com/MinThiha22/recipe-recon.git
+   npm install
 ```
-Install required dependencies.
 
-Install Expo Go on your mobile device or use IOS simulator.
+4. Start the Expo development server.
 
-## Usage
-To fully test application including Image Recognition and Recipe Generation functionalities please contact Product Owner Min Thiha Ko Ko (Mike) (minthihakoko@gmail.com) or Dan Thrope to get API key.
+```bash
+   npx expo start
+```
 
+5. Scan the terminal QR code.  
+   Running the command above, you will see a QR code in your terminal. Scan this QR code to open the app on your device.
+
+## API Usage
+
+To fully test the application, including the Image Recognition and Recipe Generation functionalities, please contact the Product Owner, Min Thiha Ko Ko (Mike), to reload the backend server, as it is running on a free version.
 
 ## Team
+
 ### Developers
+
 - Min Thiha Ko Ko (Mike) - Product Owner
 - Alexander Smokina - Scrum Master
 - Andrew Tier
@@ -46,5 +62,5 @@ To fully test application including Image Recognition and Recipe Generation func
 - Droun Mattu
 
 ## Contact
-For any questions, suggestions or contributions, please contact minthihakoko@gmail.com.
 
+For any questions, suggestions or contributions, please contact minthihakoko@gmail.com.
