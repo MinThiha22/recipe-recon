@@ -171,7 +171,10 @@ const Home = () => {
               handleChangeText={setIngredient}
               otherStyles="mb-2 w-[90%]"
             >
-              <TouchableOpacity onPress={handleClearInput}>
+              <TouchableOpacity
+                onPress={handleClearInput}
+                testID="clearInputButton"
+              >
                 <Image
                   source={icons.close}
                   className="w-5 h-5"
@@ -224,6 +227,7 @@ const Home = () => {
                   <Text className="text-lg">{ingredient}</Text>
                   <TouchableOpacity
                     onPress={() => handleRemoveIngredient(index)}
+                    testID={`removeButton-${index}`}
                   >
                     <Image
                       source={icons.close}
