@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -28,6 +28,45 @@ const Home = () => {
   const [error, setError] = useState("");
 
   const [saving, setSaving] = useState(false);
+
+  // State for dietary filters
+  const [isVeganFilter, setIsVeganFilter] = useState(false);
+  const [isVegetarianFilter, setIsVegetarianFilter] = useState(false);
+  const [isGlutenFreeFilter, setIsGlutenFreeFilter] = useState(false);
+  const [recipes, setRecipes] = useState([]);
+
+  // Function to fetch random recipes with dietary filters
+  const fetchRandomRecipes = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        "https://recipe-recon.onrender.com/api/recipeSearch/random",
+        {
+          params: {
+            isVegan: isVeganFilter ? "true" : "false",
+            isVegetarian: isVegetarianFilter ? "true" : "false",
+            isGlutenFree: isGlutenFreeFilter ? "true" : "false",
+          },
+        }
+      );
+      setRecipes(response.data.recipes || []);
+    } catch (error) {
+      console.error("Error fetching random recipes:", error);
+      setError("Failed to fetch recipes");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Apply filters and fetch recipes
+  const applyFilters = () => {
+    fetchRandomRecipes();
+  };
+
+  // Fetch recipes when filters change
+  useEffect(() => {
+    fetchRandomRecipes();
+  }, [isVeganFilter, isVegetarianFilter, isGlutenFreeFilter]);
 
   // Handler function to add the entered ingredient to the list
   const imageRecognition = async (imageUri) => {
@@ -69,7 +108,7 @@ const Home = () => {
         (item) => !genericCategories.includes(item.description)
       );
 
-      console.log(filteredData);
+      // console.log(filteredData);
       if (filteredData.length > 0) {
         const options = filteredData.map((item) => item.description);
         const scores = filteredData.map((item) => item.score);
