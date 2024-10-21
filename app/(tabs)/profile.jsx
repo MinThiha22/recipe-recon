@@ -1,16 +1,12 @@
-import {
-  Alert,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Modal,
-} from "react-native";
+import { Alert,View,Text,ScrollView,TouchableOpacity,Modal } from "react-native";
 import { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import CustomButton from "../../components/CustomButton";
+import ProfileHeader from "../../components/ProfileHeader";
+import ProfileActionButtons from "../../components/ProfileActionButtons";
+import SavedIngredientsList from "../../components/SavedIngredientsList";
+import ProfileRecipeList from "../../components/ProfileRecipeList";
+import RecipeInfo from "../../components/RecipeInfo.jsx";
 import { useGlobalContext } from "../../context/GlobalProvider";
 import { useFocusEffect } from "@react-navigation/native";
 import {
@@ -32,9 +28,6 @@ import {
 } from "../../lib/firebase";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
-import { images, icons } from "../../constants";
-import FormField from "../../components/FormField";
-import RecipeInfo from "../../components/RecipeInfo.jsx";
 import axios from "axios";
 import Comments from "../../components/Comments";
 
@@ -61,7 +54,7 @@ const Profile = () => {
   const [bookmarks, setBookmarks] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [commentsVisible, setCommentsVisible] = useState(null);
+  const [commentsVisible, setCommentsVisible] = useState(false);
   const [favouriteToggled, setFavouriteToggled] = useState(false);
 
   // Log out current user when log out button is pressed
@@ -273,7 +266,6 @@ const Profile = () => {
 
   const editProfile = async () => {
     if (isLoading) return;
-    setRecents(recents.reverse());
     setIsEditing(true);
   };
 
@@ -347,8 +339,6 @@ const Profile = () => {
     setIsEditing(false);
     setIngredients(userData.savedIngredients);
     setFavourites(userData.favourites);
-
-    setRecents(recents.reverse());
     setBookmarks(userData.bookmarks);
   };
 
@@ -391,56 +381,15 @@ const Profile = () => {
     <SafeAreaView className="h-full bg-primary">
       <ScrollView>
         <View className="w-full min-h-[80vh] items-center">
-          <Text className="text-3xl mt-5 text-title font-chewy">
-            Your Profile
-          </Text>
-          {isLoadingInfo && (
-            <Text className="text-lg mt-3 text-secondary font-poppinsBold">
-              Loading...Please wait...
-            </Text>
-          )}
-          {!isLoadingInfo && !isEditing && (
-            <Text className="text-lg mt-3 text-secondary font-poppinsBold">
-              Hello {userData.username}
-            </Text>
-          )}
-          {isEditing && (
-            <FormField
-              title=""
-              value={newUsername}
-              placeholder={userData.username}
-              handleChangeText={(text) => {
-                setNewUsername(text);
-              }}
-              otherStyles="w-[30%]"
-            />
-          )}
-
-          <View className="relative mt-3">
-            {userData.profilePicture ? (
-              <Image
-                source={{ uri: userData.profilePicture }}
-                resizeMode="contain"
-                className="bg-secondary w-[120px] h-[120px] rounded-full border-black border-2"
-              />
-            ) : (
-              <Image
-                source={images.profilePlaceHolder}
-                resizeMode="contain"
-                className="w-[120px] h-[120px] rounded-full"
-              ></Image>
-            )}
-            <TouchableOpacity
-              onPress={pickImage}
-              className="absolute right-0 bottom-0 p-2 bg-secondary rounded-full"
-            >
-              <Image
-                source={icons.addIcon}
-                className="w-[15px] h-[15px]"
-              ></Image>
-            </TouchableOpacity>
-          </View>
-
+          <ProfileHeader
+            username={userData.username}
+            isEditing={isEditing}
+            profilePicture={userData.profilePicture}
+            newUsername={newUsername}
+            setNewUsername={setNewUsername}
+            pickImage={pickImage}
+            isLoadingInfo={isLoadingInfo}
+          />
           <View className="flex-col items-center mt-5">
             <Text className="text-lg font-poppinsBold text-secondary">
               Personal Info
@@ -449,351 +398,108 @@ const Profile = () => {
               Email: {userData.email}
             </Text>
           </View>
-          {!isEditing ? (
-            <View className="justify-center flex-row mt-4">
-              <CustomButton
-                title="Edit Profile"
-                handlePress={editProfile}
-                containerStyles={"w-[30%]"}
-                isLoading={isSumbitting}
-              />
-              <CustomButton
-                title="Log Out"
-                handlePress={logOut}
-                containerStyles={"w-[30%] ml-2"}
-                isLoading={isSumbitting}
-              />
-            </View>
-          ) : (
-            <View className="justify-center flex-row mt-4">
-              <CustomButton
-                title="Save"
-                handlePress={() => {
-                  Alert.alert(
-                    "Confirm?",
-                    "Do you want to save your profile data?",
-                    [
-                      {
-                        text: "Yes",
-                        onPress: saveChanges,
-                      },
-                      {
-                        text: "No",
-                        style: "cancel",
-                      },
-                    ]
-                  );
-                }}
-                containerStyles={"bg-red-400 w-[30%]"}
-                isLoading={isSumbitting}
-              />
-              <CustomButton
-                title="Cancel"
-                handlePress={cancelChanges}
-                containerStyles={"bg-red-400 w-[30%] ml-2"}
-                isLoading={isSumbitting}
-              />
-            </View>
-          )}
-          <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
 
-          <View className="items-center">
-            <Text className="text-lg font-poppinsBold text-secondary">
-              Saved ingredients
-            </Text>
-
-            {isLoading && (
-              <Text className=" text-secondary font-poppingsRegular">
-                Loading...Please wait...
-              </Text>
-            )}
-            {!isLoading && (
-              <>
-                <View className="pt-2">
-                  {ingredients && ingredients.length > 0 ? (
-                    ingredients.map((item, index) =>
-                      isEditing ? (
-                        <View
-                          key={index}
-                          className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
-                        >
-                          <Text className="font-poppingsRegular font-bold text-secondary">
-                            {item}
-                          </Text>
-                          <TouchableOpacity
-                            onPress={() =>
-                              tempDeleteItem(item, ingredients, setIngredients)
-                            }
-                          >
-                            <Image source={icons.close} className="w-4 h-4" />
-                          </TouchableOpacity>
-                        </View>
-                      ) : (
-                        <View
-                          key={index}
-                          className="flex-row justify-between items-center p-2 mb-1 rounded-md w-[70%]"
-                        >
-                          <Text className="font-poppingsBold text-lg font-bold text-secondary">
-                            {item}
-                          </Text>
-                        </View>
-                      )
-                    )
-                  ) : (
-                    <Text className="font-poppingsRegular text-secondary">
-                      No saved ingredients
-                    </Text>
-                  )}
-                  {isEditing && ingredients && ingredients.length > 0 && (
-                    <View className="items-center">
-                      <TouchableOpacity
-                        onPress={() => {
-                          Alert.alert(
-                            "Confirm?",
-                            "Are you sure you want to delete all saved ingredients",
-                            [
-                              {
-                                text: "Yes",
-                                onPress: tempDeleteAll,
-                              },
-                              {
-                                text: "No",
-                                style: "cancel",
-                              },
-                            ]
-                          );
-                        }}
-                        className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[40%]"
-                      >
-                        <Text className="text-black font-poppingsBold">
-                          Delete All
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                </View>
-              </>
-            )}
-          </View>
+          <ProfileActionButtons
+            isEditing={isEditing}
+            editProfile={editProfile}
+            logOut={logOut}
+            saveChanges={() => {
+              Alert.alert(
+                "Confirm?",
+                "Do you want to save your profile data?",
+                [
+                  { text: "Yes", onPress: saveChanges },
+                  { text: "No", style: "cancel" },
+                ]
+              );
+            }}
+            cancelChanges={cancelChanges}
+            isSumbitting={isSumbitting}
+          />
 
           <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
 
-          <View className="items-center">
-            <Text className="text-lg font-poppinsBold text-secondary">
-              Bookmarks
-            </Text>
-            {isLoading && (
-              <Text className=" text-secondary font-poppingsRegular">
-                Loading...Please wait...
-              </Text>
-            )}
-            {!isLoading && (
-              <>
-                <View className="pt-2">
-                  {bookmarks && bookmarks.length > 0 ? (
-                    bookmarks.reverse().map((item, index) => (
-                      <View
-                        key={index}
-                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[80%] mx-auto"
-                      >
-                        <View className="flex-col gap-1 items-center justify-center">
-                          <Text className="font-poppinsRegular text-black text-lg">
-                            {item.name.title}
-                          </Text>
-                          <Image
-                            className="w-60 h-60"
-                            source={{ uri: item.name.imageUrl }}
-                          />
-                          <Text className="text-gray-600 mt-2">
-                            {item.name.body}
-                          </Text>
-
-                          {isEditing ? (
-                            <TouchableOpacity
-                              onPress={() =>
-                                tempDeleteItem(item, bookmarks, setBookmarks)
-                              }
-                              className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
-                            >
-                              <Text className="text-black font-poppingsBold">
-                                Remove
-                              </Text>
-                            </TouchableOpacity>
-                          ) : (
-                            <View>
-                              <TouchableOpacity
-                                className="bg-primary p-3 rounded-full mt-4"
-                                onPress={() =>
-                                  toggleCommentsVisibility(item.id)
-                                }
-                              >
-                                <Text className="text-white font-bold text-center">
-                                  View Comments
-                                </Text>
-                              </TouchableOpacity>
-                              <Modal
-                                animationType="slide"
-                                transparent={true}
-                                visible={commentsVisible === item.name.postId}
-                                onRequestClose={() => setCommentsVisible(null)}
-                              >
-                                <View className="flex-1 m-2 justify-end">
-                                  <View className="h-3/4 bg-white rounded-lg shadow pl-4 pr-4">
-                                    <TouchableOpacity
-                                      className="bg-primary p-3 rounded-full mt-4"
-                                      onPress={() => setCommentsVisible(null)}
-                                    >
-                                      <Text className="text-white font-bold text-center">
-                                        Hide Comments
-                                      </Text>
-                                    </TouchableOpacity>
-                                    <Comments postId={item.name.postId} />
-                                  </View>
-                                </View>
-                              </Modal>
-                            </View>
-                          )}
-                        </View>
-                      </View>
-                    ))
-                  ) : (
-                    <Text className="font-poppingsRegular text-secondary">
-                      No bookmarked recipes
-                    </Text>
-                  )}
-                </View>
-              </>
-            )}
-          </View>
-          <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
-
-          <View className="items-center">
-            <Text className="text-lg font-poppinsBold text-secondary">
-              Favourite Recipes
-            </Text>
-            {isLoading && (
-              <Text className=" text-secondary font-poppingsRegular">
-                Loading...Please wait...
-              </Text>
-            )}
-            {!isLoading && (
-              <>
-                <View className="pt-2">
-                  {favourites && favourites.length > 0 ? (
-                    favourites.map((item, index) => (
-                      <View
-                        key={index}
-                        className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[80%] mx-auto"
-                      >
-                        <View className="flex-col gap-1 items-center justify-center">
-                          <Image
-                            className="w-60 h-60"
-                            source={{ uri: item.name.image }}
-                          />
-                          <Text className="font-poppinsRegular text-black text-lg">
-                            {item.name.title}
-                          </Text>
-
-                          {isEditing ? (
-                            <TouchableOpacity
-                              onPress={() =>
-                                tempDeleteItem(item, favourites, setFavourites)
-                              }
-                              className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
-                            >
-                              <Text className="text-black font-poppingsBold">
-                                Remove
-                              </Text>
-                            </TouchableOpacity>
-                          ) : (
-                            <TouchableOpacity
-                              onPress={() => recipeSelected(item.id)}
-                              className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
-                            >
-                              <Text className="text-black font-poppingsBold">
-                                Detail
-                              </Text>
-                            </TouchableOpacity>
-                          )}
-                        </View>
-                      </View>
-                    ))
-                  ) : (
-                    <Text className="font-poppingsRegular text-secondary">
-                      No favourite recipes
-                    </Text>
-                  )}
-                </View>
-              </>
-            )}
-          </View>
+          <SavedIngredientsList
+            ingredients={ingredients}
+            isEditing={isEditing}
+            isLoading={isLoading}
+            tempDeleteItem={tempDeleteItem}
+            tempDeleteAll={() => {
+              Alert.alert(
+                "Confirm?",
+                "Are you sure you want to delete all saved ingredients",
+                [
+                  { text: "Yes", onPress: tempDeleteAll },
+                  { text: "No", style: "cancel" },
+                ]
+              );
+            }}
+            setIngredients={setIngredients}
+          />
 
           <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
 
-          <View className="items-center">
-            <Text className="text-lg font-poppinsBold text-secondary">
-              Recent Recipes
-            </Text>
-            {isLoading && (
-              <Text className=" text-secondary font-poppingsRegular">
-                Loading...Please wait...
-              </Text>
-            )}
-            {!isLoading && (
-              <>
-                <View className="pt-2">
-                  {recents && recents.length > 0 ? (
-                    recents
-                      .reverse()
-                      .slice(0, 5)
-                      .map((item, index) => (
-                        <View
-                          key={index}
-                          className="flex-row justify-between items-center bg-slate-400 p-2 mb-2 rounded-md w-[70%] mx-auto"
-                        >
-                          <View className="flex-col items-center justify-center">
-                            <Image
-                              className="w-60 h-60"
-                              source={{ uri: item.name.image }}
-                            />
-                            <Text className="font-poppinsRegular text-black text-lg">
-                              {item.name.title}
-                            </Text>
-                            {isEditing ? (
-                              <TouchableOpacity
-                                onPress={() =>
-                                  tempDeleteItem(item, recents, setRecents)
-                                }
-                                className="bg-red-400 h-[30px] rounded-xl justify-center items-center w-[30%]"
-                              >
-                                <Text className="text-black font-poppingsBold">
-                                  Remove
-                                </Text>
-                              </TouchableOpacity>
-                            ) : (
-                              <TouchableOpacity
-                                onPress={() => recipeSelected(item.id)}
-                                className="bg-title h-[30px] rounded-xl justify-center items-center w-[30%]"
-                              >
-                                <Text className="text-black font-poppingsBold">
-                                  Detail
-                                </Text>
-                              </TouchableOpacity>
-                            )}
-                          </View>
-                        </View>
-                      ))
-                  ) : (
-                    <Text className="font-poppingsRegular text-secondary">
-                      No Recent recipes
-                    </Text>
-                  )}
-                </View>
-              </>
-            )}
-          </View>
+          <ProfileRecipeList
+            title="Bookmarks"
+            items={bookmarks}
+            isEditing={isEditing}
+            isLoading={isLoading}
+            onItemPress={recipeSelected}
+            onDeleteItem={(item) =>
+              tempDeleteItem(item, bookmarks, setBookmarks)
+            }
+            showComments={true}
+            onToggleComments={toggleCommentsVisibility}
+          />
+
+          <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
+
+          <ProfileRecipeList
+            title="Favourite Recipes"
+            items={favourites}
+            isEditing={isEditing}
+            isLoading={isLoading}
+            onItemPress={recipeSelected}
+            onDeleteItem={(item) =>
+              tempDeleteItem(item, favourites, setFavourites)
+            }
+          />
+          <View className="my-4 border-t border-secondary w-[80%] max-w-md" />
+
+          <ProfileRecipeList
+            title="Recent Recipes"
+            items={recents}
+            isEditing={isEditing}
+            isLoading={isLoading}
+            onItemPress={recipeSelected}
+            onDeleteItem={(item) => tempDeleteItem(item, recents, setRecents)}
+          />
         </View>
       </ScrollView>
+
+      {commentsVisible && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={!!commentsVisible}
+          onRequestClose={() => setCommentsVisible(false)}
+        >
+          <View className="flex-1 m-2 justify-end">
+            <View className="h-3/4 bg-white rounded-lg shadow pl-4 pr-4">
+              <TouchableOpacity
+                className="bg-primary p-3 rounded-full mt-4"
+                onPress={() => setCommentsVisible(false)}
+              >
+                <Text className="text-white font-bold text-center">
+                  Hide Comments
+                </Text>
+              </TouchableOpacity>
+              <Comments postId={commentsVisible} />
+            </View>
+          </View>
+        </Modal>
+      )}
+
       {selectedRecipe && (
         <RecipeInfo
           selectedRecipe={selectedRecipe}
