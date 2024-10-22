@@ -64,22 +64,22 @@ const RecipeList = () => {
 
     let ingredients = ingredientsList.join(",");
     let endpoint = null;
-    let param = {};
-    let sort = null;
+    let queryParameters = {};
+    let sortingCriteria = null;
 
     if (query.trim()) {
       //if search bar is not empty and sorting by ingredients and query, if not sort by query
       endpoint = "https://recipe-recon.onrender.com/api/recipeSearch";
       ingredients = currentIsSortByIngredients ? ingredientsList.join(",") : "";
-      sort = currentIsSortByIngredients
+      sortingCriteria = currentIsSortByIngredients
         ? "min-missing-ingredients"
         : "popularity";
 
       // Prepare parameters including filters
-      param = {
+      queryParameters = {
         query,
         ingredients,
-        sort,
+        sort: sortingCriteria,
         isVegetarian: currentIsVegetarianFilter,
         isVegan: currentIsVeganFilter,
         isGlutenFree: currentIsGlutenFreeFilter,
@@ -91,25 +91,25 @@ const RecipeList = () => {
         : "https://recipe-recon.onrender.com/api/recipeSearch/random";
 
       // If sorting by ingredients use ingredients parameter else use no paramters
-      param = currentIsSortByIngredients ? { ingredients } : {};
+      queryParameters = currentIsSortByIngredients ? { ingredients } : {};
 
       // Apply filters
       if (currentIsVegetarianFilter) {
-        param.isVegetarian = true;
+        queryParameters.isVegetarian = true;
       }
 
       if (currentIsVeganFilter) {
-        param.isVegan = true;
+        queryParameters.isVegan = true;
       }
 
       if (currentIsGlutenFreeFilter) {
-        param.isGlutenFree = true;
+        queryParameters.isGlutenFree = true;
       }
     }
 
     // Fetch data from server endpoint using parameters
     try {
-      const response = await axios.get(endpoint, { params: param });
+      const response = await axios.get(endpoint, { params: queryParameters });
       const recipeData =
         response.data.recipes || response.data.results || response.data;
       setRecipes(recipeData);
