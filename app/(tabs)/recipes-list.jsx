@@ -15,6 +15,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { getRecents, checkAuthState } from "../../lib/firebase.js";
 import FilterButton from "../../components/FilterButton.jsx";
 import RecipeInfo from "../../components/RecipeInfo.jsx";
+import { isRecipeDietaryCompliant } from "../../components/DietaryFilter.jsx";
 
 const RecipeList = () => {
   const [query, setQuery] = useState("");
@@ -45,7 +46,21 @@ const RecipeList = () => {
     );
   };
 
-  // Get api recipes data from server (modified)
+  // Filter recipes after they are fetched
+  const filterRecipes = (recipes) => {
+    let filteredRecipes = recipes;
+
+    // Apply dietary filters
+    if (isVegetarianFilter || isVeganFilter) {
+      filteredRecipes = filteredRecipes.filter((recipe) =>
+        isRecipeDietaryCompliant(recipe, isVeganFilter)
+      );
+    }
+
+    return filteredRecipes;
+  };
+
+  // Get API recipes data from server (modified)
   const searchRecipes = async (
     currentIsSortByIngredients,
     currentIsVegetarianFilter,
@@ -54,7 +69,6 @@ const RecipeList = () => {
   ) => {
     setRecipes([]);
     setLoading(true);
-    setError("");
     setError("");
 
     // Refresh ingredients if sorting by ingredients
@@ -80,8 +94,8 @@ const RecipeList = () => {
         query,
         ingredients,
         sort: sortingCriteria,
-        isVegetarian: currentIsVegetarianFilter,
-        isVegan: currentIsVeganFilter,
+        isVegetarian: currentIsVegetarianFilter.toString(),
+        isVegan: currentIsVeganFilter.toString(),
         isGlutenFree: currentIsGlutenFreeFilter,
       };
     } else {
@@ -90,30 +104,28 @@ const RecipeList = () => {
         ? "https://recipe-recon.onrender.com/api/ingredientsSearch"
         : "https://recipe-recon.onrender.com/api/recipeSearch/random";
 
-      // If sorting by ingredients use ingredients parameter else use no paramters
-      queryParameters = currentIsSortByIngredients ? { ingredients } : {};
-
-      // Apply filters
-      if (currentIsVegetarianFilter) {
-        queryParameters.isVegetarian = true;
-      }
-
-      if (currentIsVeganFilter) {
-        queryParameters.isVegan = true;
-      }
-
-      if (currentIsGlutenFreeFilter) {
-        queryParameters.isGlutenFree = true;
-      }
+      // If sorting by ingredients use ingredients parameter else use filters for random recipes
+      queryParameters = currentIsSortByIngredients
+        ? { ingredients }
+        : {
+            isVegetarian: currentIsVegetarianFilter.toString(),
+            isVegan: currentIsVeganFilter.toString(),
+            isGlutenFree: currentIsGlutenFreeFilter,
+          };
     }
 
     // Fetch data from server endpoint using parameters
     try {
       const response = await axios.get(endpoint, { params: queryParameters });
-      const recipeData =
+      let recipeData =
         response.data.recipes || response.data.results || response.data;
-      setRecipes(recipeData);
+
+      // Apply dietary filters manually
+      let filteredRecipes = filterRecipes(recipeData);
+
+      setRecipes(filteredRecipes);
     } catch (err) {
+      console.error("Error fetching recipes:", err.message);
       setError("Failed to fetch recipes");
     } finally {
       setLoading(false);
@@ -293,6 +305,7 @@ const RecipeList = () => {
           onPress={() =>
             searchRecipes(
               isSortByIngredients,
+              isVegetarianFilter,
               isVeganFilter,
               isGlutenFreeFilter
             )
@@ -309,6 +322,13 @@ const RecipeList = () => {
           </Text>
         )}
         {error && <Text className="text-red-500 mb-4">{error}</Text>}
+
+        {/* No Results Found Message */}
+        {!loading && recipes.length === 0 && (
+          <Text className="text-xl text-center text-title pt-10">
+            No Results Found
+          </Text>
+        )}
 
         {/* Recipe List */}
         <FlatList

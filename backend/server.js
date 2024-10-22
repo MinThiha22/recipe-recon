@@ -114,13 +114,18 @@ app.get("/api/recipeInfo", async (req, res) => {
   }
 });
 
-// UPDATE START
+// Random recipe endpoint to handle dietary filters
 app.get("/api/recipeSearch/random", async (req, res) => {
-  const { isVegan, isVegetarian, isGlutenFree } = req.query; // Fetch dietary filters from the query
+  const { query, ingredients, sort, isVegetarian, isVegan, isGlutenFree } =
+    req.query; // Fetch dietary filters from the query
 
   // Initialize params for the API request
   const params = {
+    query: query,
     number: 10,
+    includeIngredients: ingredients,
+    fillIngredients: true,
+    sort: sort,
     apiKey: process.env.SPOONACULAR_API_KEY,
   };
 
@@ -131,6 +136,7 @@ app.get("/api/recipeSearch/random", async (req, res) => {
     params.diet = "vegetarian";
   }
 
+  // Apply Gluten-Free filter if selected
   if (isGlutenFree === "true") {
     params.intolerances = "gluten";
   }
@@ -148,7 +154,6 @@ app.get("/api/recipeSearch/random", async (req, res) => {
       .json({ error: "Failed to fetch data from Spoonacular API" });
   }
 });
-// UPDATED END
 
 const upload = multer({ storage: multer.memoryStorage() });
 
